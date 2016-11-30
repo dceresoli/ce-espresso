@@ -957,6 +957,9 @@ MODULE input_parameters
           ! time step for CP-BO electron minimization dynamics, in atomic units
           ! CP: 1 a.u. of time = 2.4189 * 10^-17 s, PW: twice that much
 
+        CHARACTER(256) :: external_potential = ''
+          ! add an external potential
+
         NAMELIST / electrons / emass, emass_cutoff, orthogonalization, &
           electron_maxstep, scf_must_converge, ortho_eps, ortho_max, electron_dynamics,   &
           electron_damping, electron_velocities, electron_temperature, &
@@ -977,7 +980,7 @@ MODULE input_parameters
           occupation_constraints, niter_cg_restart,                    &
           niter_cold_restart, lambda_cold, efield_cart, real_space,    &
           tcpbo,emass_emin, emass_cutoff_emin, electron_damping_emin,  &
-          dt_emin, efield_phase
+          dt_emin, efield_phase, external_potential
 
 !
 !=----------------------------------------------------------------------------=!

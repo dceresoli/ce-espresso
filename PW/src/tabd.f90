@@ -24,6 +24,9 @@ FUNCTION hubbard_occ ( psd )
      !
      ! TRANSITION METALS
      !
+     CASE( 'Sc','Y','Tl' )
+        hubbard_occ = 1.d0
+        !
      CASE( 'Ti', 'Zr', 'Hf' )
         hubbard_occ = 2.d0
         !
@@ -65,7 +68,7 @@ FUNCTION hubbard_occ ( psd )
      CASE( 'Pm', 'Np' )
         hubbard_occ = 5.d0
      !
-     CASE( 'Sm', 'Pu' )
+     CASE( 'Sm', 'Pu','F' )
         hubbard_occ = 6.d0
      !
      CASE( 'Eu', 'Am' )
@@ -97,19 +100,22 @@ FUNCTION hubbard_occ ( psd )
      !
      ! OTHER ELEMENTS
      !
-     CASE( 'C'  )
+     CASE( 'C', 'Sr','Si','Ba','Sn','Be','Mg','Ca','Ge','Pb')
         hubbard_occ = 2.d0
      !
-     CASE( 'N'  )
+     CASE('Cl', 'Br','I','At' )
+        hubbard_occ = 5.d0
+     !
+     CASE( 'N','P','As','Sb','Bi')
         hubbard_occ = 3.d0
      !
-     CASE( 'O'  )
+     CASE( 'O', 'Se', 'S', 'Te','Po' )
         hubbard_occ = 4.d0
      !
-     CASE( 'H'  )
+     CASE( 'H','Li','Na','B','Al','K','Rb','Cs')
         hubbard_occ = 1.d0
      !
-     CASE( 'Ga', 'In'  )
+     CASE( 'Ga', 'In' )
         hubbard_occ = 10.d0
      !
      !

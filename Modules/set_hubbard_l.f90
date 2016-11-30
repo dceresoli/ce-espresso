@@ -38,15 +38,19 @@ FUNCTION set_hubbard_l( psd ) RESULT( hubbard_l )
      !
      ! ... other elements
      !
-     CASE( 'H' )
+     CASE('H', 'Sr','Mg', 'Ba','Li','Be','Na','K','Ca','Rb','Cs')
         !
         hubbard_l =  0
         !
-     CASE( 'C', 'N', 'O' )
+     CASE('C', 'N', 'O', 'Se', 'S', 'Te','Sn','B','F','Al','Si','P','Cl')
         !
         hubbard_l =  1
+       !
+     CASE('Ge','As','Br','Sb','I','Tl','Pb','Bi','Po','At')
         !
-     CASE( 'As', 'Ga', 'In' )
+        hubbard_l =  1
+       !
+     CASE('Ga', 'In','Y')
         !
         hubbard_l =  2
         !

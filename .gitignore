@@ -7,7 +7,7 @@ bin
 config.log
 config.status
 configure.msg
-make.inc
+make.inc*
 iotk
 S3DE
 Modules/version.f90

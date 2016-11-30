@@ -428,6 +428,7 @@ end if
              write(2,*) 'calculation="scf"'
              write(2,*) 'tprnfor    = .true.'
              write(2,*) trim(control)
+             write(2,*) 'prefix="'//trim(fd_prefix)//'.'//TRIM(cnx)//'.'//TRIM(ci)//'.'//TRIM(cna)//'"'
              write(2,*) '/'
              write(2,*) '&SYSTEM'
              write(2,*) 'ibrav  = 0'
@@ -438,7 +439,7 @@ end if
              write(2,'(300a)') trim(system2)
              write(2,*) '/'
              write(2,*) '&ELECTRONS'
-             write(2,*) trim(electrons)
+             write(2,'(A)') trim(electrons)
              write(2,*) '/'
              write(2,*) 'ATOMIC_SPECIES'
              DO nt = 1, ntyp

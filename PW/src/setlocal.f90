@@ -34,6 +34,7 @@ SUBROUTINE setlocal
   USE martyna_tuckerman, ONLY : wg_corr_loc, do_comp_mt
   USE esm,       ONLY : esm_local, esm_bc, do_comp_esm
   USE qmmm,      ONLY : qmmm_add_esf
+  USE extpot,    ONLY : textpot, ext_pot
   !
   IMPLICIT NONE
   COMPLEX(DP), ALLOCATABLE :: aux (:), v_corr(:)
@@ -87,6 +88,10 @@ SUBROUTINE setlocal
   !
   IF ( tefield .AND. ( .NOT. dipfield ) )  &
       CALL add_efield(vltot,etotefield,rho%of_r,.TRUE.)
+  !
+  ! ... If required add an external potentials to the local potential
+  !
+  IF ( textpot ) CALL add_extpot(dfftp%nnr, vltot, ext_pot)
   !
   ! TB
   ! if monopole plane, call add_monofield and add the linear potential, together with the background charge

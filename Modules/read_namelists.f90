@@ -399,6 +399,8 @@ MODULE read_namelists_module
        efield_cart(3)=0.d0
        efield_phase='none'
        !
+       external_potential = ''
+       !
        occupation_constraints = .false.
        !
        adaptive_thr   =  .false.
@@ -991,6 +993,10 @@ MODULE read_namelists_module
        CALL mp_bcast( efield2, ionode_id, intra_image_comm )
        CALL mp_bcast( efield_cart,   ionode_id, intra_image_comm )
        CALL mp_bcast( efield_phase,   ionode_id, intra_image_comm )
+       !
+       ! ... external potential
+       !
+       CALL mp_bcast( external_potential, ionode_id, intra_image_comm )
        !
        ! ... occupation constraints ...
        !

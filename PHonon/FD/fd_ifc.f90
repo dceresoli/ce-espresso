@@ -106,7 +106,7 @@ prefix=' '
 outdir='./'
 nrx1 = 1
 nrx2 = 1
-nrx2 = 1
+nrx3 = 1
 innx=2
 de = 0.002 ! in Angstrom
 verbose =.false.
@@ -527,7 +527,7 @@ end if
 ! populate the force matrix with pbc 
 
 allocate (fforce(innx,3,3,natx,natx))
-
+fforce = -1e10
 do nr1=1,nrx1
    do nr2=1,nrx2
       do nr3=1,nrx3
