@@ -56,3 +56,5 @@ fft_scalar.FFTW3.o : ../include/fft_defs.h
 fft_smallbox.o : ../include/fft_defs.h
 fft_stick.o : ../include/c_defs.h
 fft_stick.o : fftw.c
+fftw.o : 
+fftw.o : 

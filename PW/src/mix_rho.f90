@@ -9,25 +9,8 @@
 #define ZERO ( 0._dp, 0._dp )
 !
 ! This macro force the normalization of betamix matrix, usually not necessary
-!#define __NORMALIZE_BETAMIX
+#define __NORMALIZE_BETAMIX
 !
-#if defined(__GFORTRAN__)
-#if (__GNUC__<4) || ((__GNUC__==4) && (__GNUC_MINOR__<8))
-#define __GFORTRAN_HACK
-#endif
-#endif
-
-#if defined(__GFORTRAN_HACK)   
-! gfortran hack - for some mysterious reason gfortran doesn't save
-!                 derived-type variables even with the SAVE attribute
-MODULE mix_save
-  USE scf, ONLY : mix_type
-  TYPE(mix_type), ALLOCATABLE, SAVE :: &
-    df(:),        &! information from preceding iterations
-    dv(:)          !     "  "       "     "        "  "
-END MODULE mix_save
-#endif
-
 !----------------------------------------------------------------------------
 SUBROUTINE mix_rho( input_rhout, rhoin, alphamix, dr2, tr2_min, iter, n_iter,&
                     iunmix, conv )
@@ -55,9 +38,6 @@ SUBROUTINE mix_rho( input_rhout, rhoin, alphamix, dr2, tr2_min, iter, n_iter,&
                              high_frequency_mixing, &
                              mix_type_COPY, mix_type_SCAL
   USE io_global,     ONLY : stdout
-#if defined(__GFORTRAN_HACK)
-  USE mix_save
-#endif
   !
   IMPLICIT NONE
   !
@@ -103,11 +83,9 @@ SUBROUTINE mix_rho( input_rhout, rhoin, alphamix, dr2, tr2_min, iter, n_iter,&
   !
   INTEGER, SAVE :: &
     mixrho_iter = 0    ! history of mixing
-#if !defined(__GFORTRAN_HACK)
   TYPE(mix_type), ALLOCATABLE, SAVE :: &
     df(:),        &! information from preceding iterations
     dv(:)          !     "  "       "     "        "  "
-#endif
   REAL(DP) :: dr2_paw, norm
   INTEGER, PARAMETER :: read_ = -1, write_ = +1
   !
@@ -237,6 +215,12 @@ SUBROUTINE mix_rho( input_rhout, rhoin, alphamix, dr2, tr2_min, iter, n_iter,&
             betamix(j,i) = betamix(i,j)
             !
         END DO
+        ! regularization by Laurence Marks
+#if defined(__NORMALIZE_BETAMIX)
+        if (iter_used > 1) betamix(i,i) = betamix(i,i) + 2d-5
+#else
+        betamix(i,i)=betamix(i,i) + 1d-7/iter_used
+#endif
         !
     END DO
     !

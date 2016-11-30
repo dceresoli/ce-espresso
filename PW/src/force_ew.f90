@@ -89,8 +89,10 @@ subroutine force_ew (alat, nat, ntyp, ityp, zv, at, bg, tau, &
   ! choose alpha in order to have convergence in the sum over G
   ! upperbound is a safe upper bound for the error ON THE ENERGY
   !
-  alpha = 1.1d0
-10 alpha = alpha - 0.1d0
+!!  alpha = 1.1d0
+!!10 alpha = alpha - 1d-4
+  alpha = 2.9d0
+10 alpha = alpha*0.99d0
   if (alpha.eq.0.d0) call errore ('force_ew', 'optimal alpha not found', 1)
   upperbound = e2 * charge**2 * sqrt (2.d0 * alpha / tpi) * &
        qe_erfc ( sqrt (tpiba2 * gcutm / 4.d0 / alpha) )

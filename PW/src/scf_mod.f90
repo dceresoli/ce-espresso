@@ -7,6 +7,13 @@
 !
 !--------------------------------------------------------------------------
 !
+! What to mix:
+#undef MIX_MAGN
+#undef MIX_MAGN_G0
+#undef MIX_HUBBARD
+#define MIX_BECP
+#undef MIX_HIGHFREQ
+
 MODULE scf
   !  
   !  This module contains variables and auxiliary routines needed for

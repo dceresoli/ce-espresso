@@ -24,10 +24,7 @@ No warrany, use at your own risk!
 * Ewald parameter computed consistently in all routines
 * possibility to control what to mix: density, magnetization, Hubbard occupations, PAW projectors
 * possibility to apply an external potential, read from file
-
-### PP
-
-* control the threshold of overlap in `bands.x`
+* computation of _Z2_ invariants according to PRB 83, 235401 (2011)
 
 
 ## Future plans

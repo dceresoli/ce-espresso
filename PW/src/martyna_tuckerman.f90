@@ -153,7 +153,8 @@ CONTAINS
   alpha = 2.9d0
   upperbound = 1._dp
   DO WHILE ( upperbound > 1.e-7_dp) 
-     alpha = alpha - 0.1_dp  
+     !!alpha = alpha - 0.1_dp  
+     alpha = alpha * 0.99d0
      if (alpha<=0._dp) call errore('init_wg_corr','optimal alpha not found',1)
      upperbound = e2 * sqrt (2.d0 * alpha / tpi) * &
                        qe_erfc ( sqrt ( ecutrho / 4.d0 / alpha) )

@@ -84,7 +84,8 @@ function ewald (alat, nat, ntyp, ityp, zv, at, bg, tau, omega, g, &
      charge = charge+zv (ityp (na) )
   enddo
   alpha = 2.9d0
-100 alpha = alpha - 0.1d0
+!!100 alpha = alpha - 1d-4
+100 alpha = alpha*0.99d0
   !
   ! choose alpha in order to have convergence in the sum over G
   ! upperbound is a safe upper bound for the error in the sum over G

@@ -220,6 +220,12 @@ MODULE input_parameters
         LOGICAL :: lberry = .false.
           ! if .TRUE., use modern theory of the polarization
 
+        LOGICAL :: lcalc_z2 = .false.
+          ! if .TRUE., calculate Z2 without inversion symmetry
+
+        REAL(DP) :: z2_m_threshold = 0.8d0, z2_z_threshold = 0.05d0
+          ! threshold for realizing the parallel transport gauge
+
         INTEGER :: gdir = 0
           ! G-vector for polarization calculation ( related to lberry )
           ! only used in PW
@@ -285,6 +291,7 @@ MODULE input_parameters
           gdir, nppstr, wf_collect, lelfield, nberrycyc, refg,            &
           tefield2, saverho, tabps, lkpoint_dir, use_wannier, lecrpa,     &
           tqmmm, vdw_table_name, lorbm, memory, point_label_type,         &
+          lcalc_z2, z2_m_threshold, z2_z_threshold,                       &
           lfcpopt, lfcpdyn, input_xml_schema_file, monopole                                        
 !
 !=----------------------------------------------------------------------------=!

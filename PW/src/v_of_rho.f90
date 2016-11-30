@@ -372,6 +372,7 @@ SUBROUTINE v_xc( rho, rho_core, rhog_core, etxc, vtxc, v )
   !
   REAL(DP), PARAMETER :: vanishing_charge = 1.D-10, &
                          vanishing_mag    = 1.D-20
+  integer :: nprhoneg(2)
   !
   !
   CALL start_clock( 'v_xc' )
@@ -380,6 +381,7 @@ SUBROUTINE v_xc( rho, rho_core, rhog_core, etxc, vtxc, v )
   vtxc   = 0.D0
   v(:,:) = 0.D0
   rhoneg = 0.D0
+  nprhoneg = 0
   !
   IF ( nspin == 1 .OR. ( nspin == 4 .AND. .NOT. domag ) ) THEN
      !
@@ -405,7 +407,10 @@ SUBROUTINE v_xc( rho, rho_core, rhog_core, etxc, vtxc, v )
            !
         ENDIF
         !
-        IF ( rho%of_r(ir,1) < 0.D0 ) rhoneg(1) = rhoneg(1) - rho%of_r(ir,1)
+        IF ( rho%of_r(ir,1) < 0.D0 ) THEN
+            rhoneg(1) = rhoneg(1) - rho%of_r(ir,1)
+            nprhoneg(1) = nprhoneg(1) + 1
+        ENDIF
         !
      END DO
 !$omp end parallel do
@@ -428,8 +433,14 @@ SUBROUTINE v_xc( rho, rho_core, rhog_core, etxc, vtxc, v )
            !
            IF ( ABS( zeta ) > 1.D0 ) zeta = SIGN( 1.D0, zeta )
            !
-           IF ( rho%of_r(ir,1) < 0.D0 ) rhoneg(1) = rhoneg(1) - rho%of_r(ir,1)
-           IF ( rho%of_r(ir,2) < 0.D0 ) rhoneg(2) = rhoneg(2) - rho%of_r(ir,2)
+           IF ( rho%of_r(ir,1) < 0.D0 ) THEN
+               rhoneg(1) = rhoneg(1) - rho%of_r(ir,1)
+               nprhoneg(1) = nprhoneg(1) + 1
+           ENDIF
+           IF ( rho%of_r(ir,2) < 0.D0 ) THEN
+               rhoneg(2) = rhoneg(2) - rho%of_r(ir,2)
+               nprhoneg(2) = nprhoneg(2) + 1
+           ENDIF
            !
            CALL xc_spin( arhox, zeta, ex, ec, vx(1), vx(2), vc(1), vc(2) )
            !
@@ -498,11 +509,14 @@ SUBROUTINE v_xc( rho, rho_core, rhog_core, etxc, vtxc, v )
   END IF
   !
   CALL mp_sum(  rhoneg , intra_bgrp_comm )
+  CALL mp_sum(  nprhoneg , intra_bgrp_comm )
   !
   rhoneg(:) = rhoneg(:) * omega / ( dfftp%nr1*dfftp%nr2*dfftp%nr3 )
   !
-  IF ( rhoneg(1) > eps8 .OR. rhoneg(2) > eps8 ) &
+  IF ( rhoneg(1) > eps8 .OR. rhoneg(2) > eps8 ) THEN
      WRITE( stdout,'(/,5X,"negative rho (up, down): ",2ES10.3)') rhoneg
+     WRITE( stdout,'(5X,"negative rho points (up, down): ",2I10)') nprhoneg
+  ENDIF
   !
   ! ... energy terms, local-density contribution
   !

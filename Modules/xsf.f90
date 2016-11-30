@@ -30,13 +30,13 @@ SUBROUTINE xsf_struct (alat, at, nat, tau, atm, ityp, ounit)
 
   WRITE(ounit,*) 'CRYSTAL'
   WRITE(ounit,*) 'PRIMVEC'
-  WRITE(ounit,'(2(3F15.9/),3f15.9)') at1
+  WRITE(ounit,'(2(3F18.9/),3f18.9)') at1
   WRITE(ounit,*) 'PRIMCOORD'
   WRITE(ounit,*) nat, 1
 
   DO n=1,nat
      ! positions are in Angstroms
-     WRITE(ounit,'(a3,3x,3f15.9)') atm(ityp(n)), &
+     WRITE(ounit,'(a3,3x,3f18.9)') atm(ityp(n)), &
           tau(1,n)*alat*BOHR_RADIUS_ANGS, &
           tau(2,n)*alat*BOHR_RADIUS_ANGS, &
           tau(3,n)*alat*BOHR_RADIUS_ANGS
@@ -71,11 +71,11 @@ SUBROUTINE xsf_fast_datagrid_3d &
   ! origin
   WRITE(ounit,'(3f10.6)') 0.0d0, 0.0d0, 0.0d0
   ! 1st spanning (=lattice) vector
-  WRITE(ounit,'(3f12.6)') (BOHR_RADIUS_ANGS*alat*at(i,1),i=1,3) ! in ANGSTROMS
+  WRITE(ounit,'(3f15.6)') (BOHR_RADIUS_ANGS*alat*at(i,1),i=1,3) ! in ANGSTROMS
   ! 2nd spanning (=lattice) vector
-  WRITE(ounit,'(3f12.6)') (BOHR_RADIUS_ANGS*alat*at(i,2),i=1,3)
+  WRITE(ounit,'(3f15.6)') (BOHR_RADIUS_ANGS*alat*at(i,2),i=1,3)
   ! 3rd spanning (=lattice) vector
-  WRITE(ounit,'(3f12.6)') (BOHR_RADIUS_ANGS*alat*at(i,3),i=1,3)
+  WRITE(ounit,'(3f15.6)') (BOHR_RADIUS_ANGS*alat*at(i,3),i=1,3)
 
   count=0
   DO i3=0,nr3
@@ -178,13 +178,13 @@ SUBROUTINE xsf_datagrid_3d &
   ! number of points in each direction
   WRITE(ounit,*) nx, ny, nz
   ! origin
-  WRITE(ounit,'(3f10.6)') (BOHR_RADIUS_ANGS*alat*x0(i),i=1,3) ! in ANGSTROMS
+  WRITE(ounit,'(3f15.6)') (BOHR_RADIUS_ANGS*alat*x0(i),i=1,3) ! in ANGSTROMS
   ! 1st spanning (=lattice) vector
-  WRITE(ounit,'(3f10.6)') (BOHR_RADIUS_ANGS*alat*e1(i)*m1,i=1,3) ! in ANGSTROMS
+  WRITE(ounit,'(3f15.6)') (BOHR_RADIUS_ANGS*alat*e1(i)*m1,i=1,3) ! in ANGSTROMS
   ! 2nd spanning (=lattice) vector
-  WRITE(ounit,'(3f10.6)') (BOHR_RADIUS_ANGS*alat*e2(i)*m2,i=1,3) ! in ANGSTROMS
+  WRITE(ounit,'(3f15.6)') (BOHR_RADIUS_ANGS*alat*e2(i)*m2,i=1,3) ! in ANGSTROMS
   ! 3rd spanning (=lattice) vector
-  WRITE(ounit,'(3f10.6)') (BOHR_RADIUS_ANGS*alat*e3(i)*m3,i=1,3)
+  WRITE(ounit,'(3f15.6)') (BOHR_RADIUS_ANGS*alat*e3(i)*m3,i=1,3)
 
   count=0
   DO iz=1,nz

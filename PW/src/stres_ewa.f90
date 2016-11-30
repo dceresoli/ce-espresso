@@ -87,7 +87,8 @@ subroutine stres_ewa (alat, nat, ntyp, ityp, zv, at, bg, tau, &
   ! upperbound is a safe upper bound for the error ON THE ENERGY
   !
   alpha = 2.9d0
-12 alpha = alpha - 0.1d0
+!12 alpha = alpha - 0.1d0
+12 alpha = alpha * 0.99d0
   if (alpha.eq.0.0) call errore ('stres_ew', 'optimal alpha not found &
        &', 1)
   upperbound = e2 * charge**2 * sqrt (2 * alpha / tpi) * &

@@ -53,7 +53,8 @@ subroutine ewald_dipole (tens,dipole)
   enddo
   eta = 2.9d0
   do
-    eta = eta - 0.1d0
+    !!eta = eta - 1d-4
+    eta = eta*0.99d0
     !
     ! choose alpha in order to have convergence in the sum over G
     ! upperbound is a safe upper bound for the error in the sum over G

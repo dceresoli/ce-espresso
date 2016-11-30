@@ -187,6 +187,11 @@ subroutine atomic_rho (rhoa, nspina)
      DO ir = 1, dfftp%nnr
         rhoa (ir, is) =  DBLE (psic (ir))
      END DO
+     ! force positive charge
+     DO ir = 1, dfftp%nnr
+        rhoa (ir, is) =  abs(rhoa(ir,is))
+     END DO
+     WRITE( stdout,'(5x,"Initial charge forced to be positive")')
      !
   enddo
 
