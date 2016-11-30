@@ -24,11 +24,13 @@ No warrany, use at your own risk!
 * Ewald parameter computed consistently in all routines
 * possibility to control what to mix: density, magnetization, Hubbard occupations, PAW projectors
 * possibility to apply an external potential, read from file
-* computation of _Z2_ invariants according to PRB 83, 235401 (2011)
+* computation of _Z2_ invariants according to PRB 83, 235401 (2011), working only with NCPPs
 
 
 ## Future plans
 * multi-orbital Hubbard U (will break input format)
+* generalize _Z2_ to ultrasoft and PAWs
+* implement projectability according to PRB 88, 165127 (2013)
 
 
 
