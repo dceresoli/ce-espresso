@@ -1,0 +1,87 @@
+
+     Program WANNIER_HAM v.5.1.1 starts on 26Dec2014 at 16:26: 2 
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Parallel version (MPI), running on     1 processors
+ Wannier#             1   21.0000000       23.0000000               1
+ Wannier#             2   21.0000000       23.0000000               1
+ Wannier#             3   21.0000000       23.0000000               1
+
+   Info: using nr1, nr2, nr3 values from input
+
+   Info: using nr1s, nr2s, nr3s values from input
+
+     IMPORTANT: XC functional enforced from input :
+     Exchange-correlation      =  SLA  PW   PBE  PBE ( 1  4  3  4 0 0)
+     Any further DFT definition will be discarded
+     Please, verify this is what you really want
+
+               file O.pbe-rrkjus.UPF: wavefunction(s)  2S renormalized
+
+     G-vector sticks info
+     --------------------
+     sticks:   dense  smooth     PW     G-vecs:    dense   smooth      PW
+     Sum         593     593    185                10779    10779    1935
+
+     Spin 1
+       Wannier #  1 centered on atom V   (position  0.00000 0.00000 0.00000 )
+         Bands for generation: from  21 to  23
+         Trial wavefunction ingredients:
+          1.0000000000 of l=2, m=2
+       Wannier #  2 centered on atom V   (position  0.00000 0.00000 0.00000 )
+         Bands for generation: from  21 to  23
+         Trial wavefunction ingredients:
+          1.0000000000 of l=2, m=3
+       Wannier #  3 centered on atom V   (position  0.00000 0.00000 0.00000 )
+         Bands for generation: from  21 to  23
+         Trial wavefunction ingredients:
+          1.0000000000 of l=2, m=5
+
+     Spin 1:
+       Wannier#  1
+         occupation:0.221
+         energy: 13.228 eV
+       Wannier#  2
+         occupation:0.221
+         energy: 13.228 eV
+       Wannier#  3
+         occupation:0.221
+         energy: 13.228 eV
+       Wannier occupation matrix:
+
+         0.221  0.000 -0.000
+         0.000  0.221 -0.000
+        -0.000 -0.000  0.221
+
+     Hamiltonian is in the JK format, 1728 k-points
+     ATTENTION: All k-points weights are real weights
+
+  
+     Projected Hamiltonian eigenvalues (eV):
+       spin1      13.2285  13.2285  13.2285
+  
+     Generation of interaction matrix U
+     (works only for nspin=1 case)
+
+      0.00 2.38 2.38 4.69 3.15 3.15
+      2.38 0.00 2.38 3.15 4.69 3.15
+      2.38 2.38 0.00 3.15 3.15 4.69
+      4.69 3.15 3.15 0.00 2.38 2.38
+      3.15 4.69 3.15 2.38 0.00 2.38
+      3.15 3.15 4.69 2.38 2.38 0.00
+
+
+     WANNIER_HAM  :  0m40.48s CPU     4m 6.86s WALL
+
+
+   This run was terminated on:  16:30: 9  26Dec2014            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=

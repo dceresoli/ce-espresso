@@ -1,0 +1,23 @@
+       implicit none
+       integer MTAU,NORB,NORBSQ,MOMEGA
+       integer myid,nprocs,seed(0:5000)
+       double precision Zero,One,Two,Ten
+       
+       parameter (MTAU=100,NORB=20,NORBSQ=92)
+       parameter (Zero=0,One=1,Two=2,Ten=10)
+       parameter (MOMEGA=20000)
+       integer Spinfac,Is,Ind,Idum,Nint,Lsq,LL,Im
+       double precision Green,Green0,U,Xlambda,Beta,Shift
+       character*80 binname
+       dimension Green(MTAU,MTAU,NORB), 
+     &           Green0(MTAU,MTAU,NORB)
+       dimension Xlambda(NORBSQ),U(NORB,NORB),Shift(NORB)
+       dimension Is(NORBSQ,MTAU),Ind(2,NORBSQ)
+
+       common/hs_field/Is,Ind
+       common/green_function/Green,Green0
+       common/aux/Idum
+       common/par_real/Beta,U,Xlambda,Shift
+       common/par_integer/Nint,Lsq,LL,Im,Spinfac
+       common/dat_mpi/nprocs,myid,seed
+       common/binn/binname

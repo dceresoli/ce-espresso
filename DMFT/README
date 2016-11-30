@@ -1,0 +1,44 @@
+This is a code that solves a model Hamiltonian of strongly correlated states 
+within Dynamical Mean Field Theory. Model Hamiltonian in Wannier functions 
+basis is produced by postprocessing utility from QE (4.1CVS version).
+
+The code strongly depends on Quantum-ESPRESSO.
+To build the code one needs:
+-parallel environment
+-LAPACK and BLAS libraries
+-configured QE distribution (at least version 4.1CVS)
+
+Installation instruction:
+- copy whole dmft directory into the root directory of QE distribution
+- cd dmft
+- make
+- executable files qmc.x, dmft.x, mix.x, maxent.x wil appear in ../bin
+  subdirectory.
+
+
+References:
+- Construction and solution of a Wannier-functions based Hamiltonian in 
+  the pseudopotential plane-wave framework for strongly correlated materials.
+  The European Physical Journal B 65 1 (2008) 91-98
+  
+- LDA+DMFT implemented with the pseudopotential plane-wave approach
+  J. Phys.: Condens. Matter 20 No 13 (2 April 2008) 135227
+
+  
+  
+
+All the material included in this distribution is free software;
+you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation;
+either version 2 of the License, or (at your option) any later version.
+
+These programs are distributed in the hope that they will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+675 Mass Ave, Cambridge, MA 02139, USA.
+
+

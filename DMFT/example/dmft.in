@@ -1,0 +1,23 @@
+&dmftin
+    nelec=1.0,
+    hdim = 3,
+    start_mu=12.0,
+    ecut=250,
+    beta=10,
+    time_slices=40,
+    nsigma=1,
+    block_start(1) = 1,
+    block_size(1) = 3,
+    nsweeps=30000
+/
+&maxent
+    energy_steps=200
+    delta_e=0.04
+    sweeps=4000
+/
+Equivalence
+1
+  3:   1  2  3
+2
+  3:  1 1   2 2   3 3
+  6:  1 2   2 1   2 3   3 2   1 3   3 1

@@ -1,0 +1,22 @@
+&inputpp
+    prefix='SrVO3'
+    outdir='./tmp/'
+    nwan = 3
+    plot_bands = .true.
+    u_matrix=.true.
+/
+&Umatrix
+    U=3.55
+    J=1.0
+/
+WANNIER_AC
+Wannier# 1 21 23
+atom 1
+d 2
+Wannier# 2 21 23
+atom 1
+d 3
+Wannier# 3 21 23
+atom 1
+d 5
+end

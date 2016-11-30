@@ -1,0 +1,192 @@
+Structure of the input data:
+===============================================================================
+
+&DMFTIN
+  ...
+/
+&MAXENT
+  ...
+/
+Equivalence
+1
+  3:   1  2  3
+2
+  3:  1 1   2 2   3 3
+  6:  1 2   2 1   2 3   3 2   1 3   3 1
+
+========================================================================
+NAMELIST: &INPUTPP
+   
+   +--------------------------------------------------------------------
+   Variable:       nelec
+   
+   Type:           REAL
+   Default:        ' '
+   Description:    number of electrons in a system
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       hdim
+   
+   Type:           REAL
+   Default:        ' '
+   Description:    dimention of Hamiltonian
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       start_mu
+   
+   Type:           REAL
+   Default:        ' '
+   Description:    Starting guess for chemical potential. Could be taken 
+                   from scf or nscf calculation
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       fix_mu
+   
+   Type:           LOGICAL
+   Default:        '.FALSE.'
+   Description:    If true chemical potential value if fixed to start_mu
+                   and number of electrons is calculated
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       beta
+   
+   Type:           REAL
+   Default:        ' '
+   Description:    Inverse temperature (1/k_b*T). b=10 -> T=1160K
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       ecut
+   
+   Type:           REAL
+   Default:        '250'
+   Description:    Cutoff for matsubara frequensies. Number of frequensies
+                   calculated as INT(ecut*beta/(2.0*PI)). Typical value is
+                   between 250 and 500
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       time_slices
+   
+   Type:           INTEGER
+   Default:        '100'
+   Description:    Inerval [0,\beta] divided onto time_slices parts.
+                   beta/time_slices should be <= 0.25
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       nsigma
+   
+   Type:           INTEGER
+   Default:        ' '
+   Description:    Number of interacting blocks (number of interacting atoms)
+                   Current version of the code will work only with nsigma=1
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       block_start(isigma),block_size(isigma),
+   
+   Type:           INTEGER
+   Default:        ' '
+   Description:    Starting element and number of elements in interacting block
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       nsweeps
+   
+   Type:           INTEGER
+   Default:        '10000'
+   Description:    Number of Monte-Carlo sweeps.
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       mixing
+   
+   Type:           REAL
+   Default:        '0.5'
+   Description:    Mixing parameter to mix old and new self-energy
+                   matrices between iterations
+   +--------------------------------------------------------------------
+========================================================================
+NAMELIST: &MAXENT
+
+	Parameters for maximum entropy calulation
+
+   +--------------------------------------------------------------------
+   Variable:       energy_steps
+   
+   Type:           INTEGER
+   Default:        '200'
+   Description:    Number of steps for spectral function calculation
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       delta_e
+   
+   Type:           REAL
+   Default:        '0.05'
+   Description:    One energy step interval
+   +--------------------------------------------------------------------
+
+   +--------------------------------------------------------------------
+   Variable:       sweeps
+   
+   Type:           INTEGER
+   Default:        '3000'
+   Description:    Number of local Monte-Carlo sweeps
+   +--------------------------------------------------------------------
+
+========================================================================
+CARD: Equivalence
+
+   Definition of equivalent elements in Hamiltonian and self-energy matrices
+   
+   /////////////////////////////////////////
+   // Syntax:                             //
+   /////////////////////////////////////////
+	1
+	  3:   1  2  3
+	2
+	  3:  1 1   2 2   3 3
+	  6:  1 2   2 1   2 3   3 2   1 3   3 1
+   
+---------------------------------------------------
+	n_cl_eq_o
+	 n_el:   1  2  3
+	n_cl_eq_me
+	 n_el:  1 1   2 2   3 3
+	 n_el:  1 2   2 1   2 3   3 2   1 3   3 1
+   
+   /////////////////////////////////////////
+   
+   DESCRIPTION OF ITEMS:
+   
+      +--------------------------------------------------------------------
+      Variables:      n_cl_eq_o
+      
+      Type:           INTEGER
+      Description:    Number of classes of equivalent orbitals
+      +--------------------------------------------------------------------
+
+      +--------------------------------------------------------------------
+      Variables:      n_el
+      
+      Type:           INTEGER
+      Description:    Number of elements in a class. After numbers of elements
+                      follows.
+      +--------------------------------------------------------------------
+
+      +--------------------------------------------------------------------
+      Variables:      n_cl_eq_me
+      
+      Type:           INTEGER
+      Description:    Number of classes of equivalent matrix elements. Equivalent matrix
+                      elements are defined in pairs.
+      +--------------------------------------------------------------------
+
+===END OF CARD==========================================================
+
