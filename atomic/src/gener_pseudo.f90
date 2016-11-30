@@ -44,6 +44,8 @@ subroutine gener_pseudo
                     lnc2paw, rhos, which_augfun, psipaw_rel, &
                     cau_fact, ik, ikus
   use atomic_paw, only : us2paw, paw2us
+  use ld1inc, only: prefix, lmax, vshift
+  use constants, only : rytoev
   use matrix_inversion
   implicit none
 
@@ -77,7 +79,7 @@ subroutine gener_pseudo
 
   integer :: &
        n, nwf0, nst, ikl, &
-       is, ios, ind, nmax
+       is, ios, ind, nmax, l
 
   character(len=5) :: indqvan
   character(len=256) :: filename
@@ -314,8 +316,9 @@ subroutine gener_pseudo
              abs(jjs(ns)-lls(ns)-0.5_dp) < 0.001_dp) then
            ind=2
         endif
+        write(stdout,'(/,5X,''NC: Shifting l='',I1,'' potential by'',F12.4,'' eV'')') lam, vshift(lam)
         do n=1,ikk(ns)
-           vnl(n,lam,ind) = chis(n,ns)/phis(n,ns)
+           vnl(n,lam,ind) = chis(n,ns)/phis(n,ns) + vshift(l)/rytoev
         enddo
      enddo
      !
@@ -394,6 +397,12 @@ subroutine gener_pseudo
            !     set the bmat with the eigenvalue part
            !
            bmat(ns,ns1)=bmat(ns,ns1)+enls(ns1)*qq(ns,ns1)
+           ! Shift the potential
+           if (lls(ns) == lls(ns1)) then
+              l = lls(ns)
+              if (vshift(l) /= 0.d0) write(stdout,'(/,5X,''US: Shifting l='',I1,'' potential by'',F12.4,'' eV'')') l, vshift(l)
+              bmat(ns,ns1) = bmat(ns,ns1) + vshift(l)/rytoev * (1.d0+qq(ns1,ns))
+           endif
            !
            !    Use symmetry of the n,ns1 indices to set qvan and qq and bmat
            !
@@ -403,6 +412,11 @@ subroutine gener_pseudo
               enddo
               qq(ns1,ns)=qq(ns,ns1)
               bmat(ns1,ns)=bmat(ns1,ns)+enls(ns)*qq(ns1,ns)
+              ! Shift the potential
+              if (lls(ns) == lls(ns1)) then
+                 l = lls(ns)
+                 bmat(ns1,ns) = bmat(ns1,ns) + vshift(l)/rytoev * (1.d0+qq(ns1,ns))
+              endif
            endif
         enddo
      enddo
@@ -488,6 +502,13 @@ subroutine gener_pseudo
   !
   ! write the main functions on files
   !
+  !<ceres>
+  open(unit=19,file=trim(prefix)//'.pot', status='unknown')
+  do n=1,grid%mesh
+     write(19,'(5e18.8)') grid%r(n),((vnl(n,l,1)+vpsloc(n)),l=0,lmax)
+  end do
+  close(19)
+  !</ceres>
   ! The beta functions  
   !
   call write_wfcfile(file_beta,betas,els,nbeta)

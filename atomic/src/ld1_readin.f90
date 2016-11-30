@@ -30,7 +30,7 @@ subroutine ld1_readin(input_file)
                          grid, zed, lmax, beta, rhoc, nconf, prefix,  &
                          nnl, jjts, zval, title, write_coulomb, &
                          nlc, rm, rho0, lloc, rcore, rcloc, nlcc, & 
-                         file_pseudo, file_pseudopw, &
+                         upf_v1_format, file_pseudo, file_pseudopw, &
                          file_potscf, file_screen, file_qvan, file_recon, &
                          file_wfcaegen, file_wfcncgen, file_wfcusgen, &
                          file_core, file_beta, file_chi, file_charge, author, &
@@ -41,7 +41,7 @@ subroutine ld1_readin(input_file)
                          rmatch_augfun, which_augfun,         & !paw
                          rmatch_augfun_nc,                    &
                          rhos, bmat, lsmall, &              ! extra for paw2us
-                         lgipaw_reconstruction, lsave_wfc, &
+                         lgipaw_reconstruction, lsave_wfc, vshift, &
                          relpert, noscf, max_out_wfc, &
                          rcutv ! LDA-1/2
 
@@ -135,6 +135,7 @@ subroutine ld1_readin(input_file)
        ! output files:
        rmatch_augfun_nc, & ! if true the norm conserving core radii are
                            ! used to smooth the Q functions
+       upf_v1_format, & ! set to true to use UPF version 1 file format (instead of version 2)
        file_pseudopw, & ! output file where the pseudopotential is written
        file_screen,   & ! output file for the screening potential
        file_core,     & ! output file for total and core charge
@@ -151,7 +152,8 @@ subroutine ld1_readin(input_file)
        file_recon, &    ! output file needed for the paw reconstruction
        lsave_wfc,&      ! set to true to save all-electron and ps wfc to file
        lgipaw_reconstruction, & ! write data for (GI)PAW reconstruction
-       use_paw_as_gipaw  ! EMINE: if true gipaw data will be read from paw
+       use_paw_as_gipaw, & ! EMINE: if true gipaw data will be read from paw
+       vshift           ! shift potential
 
    !
   prefix       = 'ld1'
@@ -224,6 +226,7 @@ subroutine ld1_readin(input_file)
   if (ionode) ios = open_input_file(input_file)
   call mp_bcast(ios, ionode_id, world_comm)
   If ( ios > 0 ) call errore('ld1_readin','opening input file ',abs(ios))
+  vshift(:) = 0.d0
 
   ! read the namelist input
 
@@ -374,12 +377,16 @@ subroutine ld1_readin(input_file)
      tm  = .false.
      pseudotype=0
      jjs=0.0_dp
+     !
+     ! format defaults
+     upf_v1_format = .false.
+
      !    paw defaults:
      lnc2paw = .false.
      rmatch_augfun=-1.0_dp   ! force a crash
      rmatch_augfun_nc =.false.
      lgipaw_reconstruction = .true.
-     use_paw_as_gipaw = .true. 
+     use_paw_as_gipaw = .false.
 
      if (ionode) read(qestdin,inputp,err=500,iostat=ios)
 500  call mp_bcast(ios, ionode_id, world_comm)
@@ -681,7 +688,7 @@ subroutine bcast_input()
   USE mp_world,   ONLY : world_comm
   USE ld1inc,   ONLY : zed, beta, tr2, iswitch, nlc, rlderiv, eminld, emaxld, &
                      deld, lsd, rel, lsmall, isic, latt, title, prefix, vdw, &
-                     nld, noscf, relpert, file_charge, max_out_wfc
+                     nld, noscf, relpert, file_charge, max_out_wfc, upf_v1_format
 
 
 implicit none
@@ -707,6 +714,7 @@ implicit none
    call mp_bcast( vdw, ionode_id, world_comm )
    call mp_bcast( file_charge, ionode_id, world_comm )
    call mp_bcast( max_out_wfc, ionode_id, world_comm )
+   call mp_bcast( upf_v1_format, ionode_id, world_comm )
 #endif
 return
 end subroutine bcast_input
@@ -722,7 +730,7 @@ subroutine bcast_inputp()
                          file_wfcusgen, file_recon, which_augfun, &
                          rmatch_augfun, lgipaw_reconstruction, lsave_wfc, &
                          rmatch_augfun_nc, & 
-                         use_paw_as_gipaw !EMINE
+                         use_paw_as_gipaw, vshift !EMINE
 implicit none
 #if defined(__MPI)
   call mp_bcast( pseudotype, ionode_id, world_comm )
@@ -751,6 +759,7 @@ implicit none
   call mp_bcast( rmatch_augfun_nc, ionode_id, world_comm )
   call mp_bcast( lsave_wfc, ionode_id, world_comm )
   call mp_bcast( lgipaw_reconstruction, ionode_id, world_comm )
+  call mp_bcast( vshift, ionode_id, world_comm )
 #endif
   return
 end subroutine bcast_inputp

@@ -13,7 +13,7 @@ subroutine write_results
   use io_global, only : stdout, ionode_id, ionode
   use mp,        only : mp_bcast
   use mp_world,  only : world_comm
-  use constants, only : eps6
+  use constants, only : eps6, fpi
   use ld1inc,    only : title, rel, zed, lsd, nspin, isic, latt, beta, tr2, &
                         grid, enzero, etot, ekin, encl, ehrt, evxt, ecxc, &
                         ehrtcc, ehrtcv, ehrtvv, enclv, enclc, verbosity,  &
@@ -21,7 +21,7 @@ subroutine write_results
                         dhrsic, dxcsic, eps0, iter, psi, rytoev_fact, lsmall, &
                         core_state, ekinc, ekinv, ae_fc_energy, cau_fact, &
                         relpert, evel, edar, eso, noscf, iswitch, rho, &
-                        file_charge, max_out_wfc
+                        file_charge, max_out_wfc, vpot
 
   use funct, only :  get_iexch, get_dft_name, write_dft_name
   implicit none
@@ -36,6 +36,8 @@ subroutine write_results
   character (len=60) :: vstates
   character (len=256) :: nomefile
   character (len=6), dimension(2) :: suffix
+  real(DP) :: spinden
+  integer :: ispin
   !
   !
   dft_name = get_dft_name()
@@ -378,6 +380,26 @@ subroutine write_results
        '<r> =',f9.4,2x,'<r2> =',f10.4,2x,'r(max) =',f9.4)
 1401 format(5x,'s(',a2,'/',a2,') =',f10.6)
 
+  !<ceres>
+  write(6,*)
+  write(6,'(''Densities at the nucleus in bohrradius^-3:'')')
+  spinden = 0.d0
+  do i = 1, nwf
+    if (ll(i) .ne. 0) cycle
+    ispin = 1; if (isw(i) .eq. 2) ispin = -1
+    spinden = spinden + ispin*oc(i)*psi(1,1,i)**2/grid%r2(1)/fpi
+    write(6,'(A2,4X,''spin='',I2,6X,F12.4)') el(i), ispin, ispin*oc(i)*psi(1,1,i)**2/grid%r2(1)/fpi
+    if (mod(i,2) == 1) then
+      do n = 1, grid%mesh
+        write(70+i,*) grid%r(n), oc(i)*psi(n,1,i)**2/fpi-oc(i+1)*psi(n,1,i+1)**2/fpi
+      enddo
+    endif
+  enddo
+  write(6,'(''Total spin density:'',E12.6,2X,''bohrradius^-3'')') spinden
+  write(6,'(''Total spin density:'',E12.6,2X,''angstrom^-3'')') spinden*6.7483346
+  write(6,*)
+  !</ceres>
+
   IF (rel==2.and.verbosity=='high'.and..not.noscf) &
      write(stdout,'(/,5x,"LC charge =",f12.8," + SC charge =",&
             & f12.8," =",f12.8)') charge_large, charge_small, &
@@ -427,11 +449,11 @@ subroutine write_results
      if (ionode) then
         IF (lsd<1) THEN
            do n=1,grid%mesh
-              write(20,'(2e20.9)') grid%r(n), rho(n,1)
+              write(20,'(3e20.9)') grid%r(n), rho(n,1), vpot(n,1)
            enddo
         ELSE
            do n=1,grid%mesh
-              write(20,'(3e20.9)') grid%r(n), rho(n,1), rho(n,2)
+              write(20,'(5e20.9)') grid%r(n), rho(n,1), rho(n,2), vpot(n,1), vpot(n,2)
            enddo
         ENDIF
         close(20)

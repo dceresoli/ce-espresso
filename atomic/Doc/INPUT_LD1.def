@@ -437,6 +437,13 @@ input_description -distribution {Quantum Espresso} -program ld1.x {
 	    }
 	}
 
+	var upf_v1_format -type LOGICAL {
+            default { .false. }
+	    info {
+		.true. generates pseudo-potential file in UPF version 1 format
+	    }
+	}
+
 	var file_pseudopw -type CHARACTER {
 	    status { REQUIRED }
 	    info { 

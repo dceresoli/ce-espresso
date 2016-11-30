@@ -100,7 +100,8 @@ write_files.o \
 write_paw_recon.o \
 write_pseudo.o \
 write_results.o \
-write_resultsps.o
+write_resultsps.o \
+write_upf.o
 
 LD1MODS = \
 atomic_paw.o \

@@ -305,6 +305,7 @@ MODULE ld1inc
   !
   !  file names
   !
+  LOGICAL :: upf_v1_format     ! set to true to use version 1 of UPF file format
   CHARACTER(len=75)  :: title  ! the title of the run
   CHARACTER(len=75)  :: author ! the author of the pseudopotential
   CHARACTER(len=240) :: prefix ! prefix for file names
@@ -354,4 +355,8 @@ MODULE ld1inc
   REAL ( dp ) :: wfc_ps_recon(ndmx,nwfsx)
   REAL ( dp ) :: wfc_us_recon(ndmx,nwfsx)
   !
+  ! Potential shift
+  !
+  REAL ( dp ) :: vshift(0:lmx)
+
 END MODULE ld1inc

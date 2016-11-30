@@ -18,7 +18,7 @@ subroutine ld1_writeout
   use io_global, only : qestdin, stdout, ionode, ionode_id
   use mp,        only : mp_bcast
   use mp_world,  only : world_comm
-  use ld1inc, only : file_pseudopw, zed, grid, &
+  use ld1inc, only : file_pseudopw, upf_v1_format, zed, grid, &
                      nconf , lpaw, rel, pawsetup, pseudotype, &
                      rhoc, vnl, phits, vpsloc, & 
                      elts, llts, octs, rcut, etots, nwfts, &
@@ -89,7 +89,11 @@ subroutine ld1_writeout
         !
      else
         !
-        call export_upf(iunps, qestdin)
+        if(upf_v1_format) then
+            call write_upf_v1(iunps)
+        else
+            call export_upf(iunps, qestdin)
+        endif
         !
         if(lpaw) call deallocate_pseudo_paw( pawsetup )
         !
