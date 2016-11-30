@@ -72,7 +72,7 @@ SUBROUTINE setup()
   USE uspp,               ONLY : okvan
   USE ldaU,               ONLY : lda_plus_u, init_lda_plus_u
   USE bp,                 ONLY : gdir, lberry, nppstr, lelfield, lorbm, nx_el,&
-                                 nppstr_3d,l3dstring, efield
+                                 nppstr_3d,l3dstring, efield, lcalc_z2
   USE fixed_occ,          ONLY : f_inp, tfixed_occ, one_atom_occupations
   USE funct,              ONLY : set_dft_from_name
   USE mp_pools,           ONLY : kunit
@@ -492,7 +492,7 @@ SUBROUTINE setup()
         nrot  = 1
         nsym  = 1
         !
-     ELSE IF (lberry ) THEN
+     ELSE IF (lberry .OR. lcalc_z2) THEN
         !
         CALL kp_strings( nppstr, gdir, nrot, s, bg, npk, &
                          k1, k2, k3, nk1, nk2, nk3, nkstot, xk, wk )
