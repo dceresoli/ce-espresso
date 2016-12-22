@@ -1,15 +1,18 @@
 New in svn version:
 
   * Hybrid functionals with PAW now work
+  * Optimized tetrahedron method, contributed by Mitsuaki Kawamura, U. Tokyo
 
 Incompatible changes in svn version:
 
   * Routine h_psiq deleted, replaced by h_psi
+  * Variables related to tetrahedron method moved around
 
 Fixed in svn version
 
+  * pwi2xsf utility, also used in XCrysDen: various fixes (r13197)
   * PP: incorrect results in "projwfc.x" with PAW projection due to a 
-        missing line (r13121)
+        missing line (r13121); crash in pw_export.x" due to dumb error (r13189)
   * PW: final scf step in variable-cell calculation could crash
         due to missing reset of FFT dimensions (r13116)
   * FD: dangerous "q==0" check in matdyn.f90 (r13109)

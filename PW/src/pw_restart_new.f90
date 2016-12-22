@@ -60,7 +60,6 @@ MODULE pw_restart_new
                                        two_fermi_energies, nelup, neldw, tot_charge
       USE start_k,              ONLY : nk1, nk2, nk3, k1, k2, k3, &
                                        nks_start, xk_start, wk_start
-      USE ktetra,               ONLY : ntetra, tetra, ltetra
       USE gvect,                ONLY : ngm, ngm_g, g, mill
       USE fft_base,             ONLY : dfftp
       USE basis,                ONLY : natomwfc
@@ -322,12 +321,21 @@ MODULE pw_restart_new
             h_energy  = ef 
          END IF 
          IF (TRIM(input_parameters_occupations) == 'smearing' ) THEN
+              IF (TRIM(qexsd_input%tagname) .ne. 'input') THEN 
+                 qexsd_input%k_points_IBZ%lwrite=.FALSE.
+                 qexsd_input%bands%occupations%lwrite = .FALSE. 
+                 qexsd_input%bands%smearing%lwrite = .FALSE.
+              END IF             
               CALL  qexsd_init_band_structure(output%band_structure,lsda,noncolin,lspinorb, &
                    nbnd,nelec, natomwfc, occupations_are_fixed, & 
                    h_energy,two_fermi_energies, [ef_up,ef_dw], et,wg,nkstot,xk,ngk_g,wk,    & 
                    STARTING_KPOINTS = qexsd_input%k_points_IBZ, OCCUPATION_KIND = qexsd_input%bands%occupations, &
                    WF_COLLECTED = twfcollect, SMEARING = qexsd_input%bands%smearing)
          ELSE     
+              IF ( TRIM(qexsd_input%tagname) .ne. 'input') THEN
+                 qexsd_input%k_points_IBZ%lwrite = .FALSE.
+                 qexsd_input%bands%occupations%lwrite = .FALSE.
+              END IF 
               CALL  qexsd_init_band_structure(output%band_structure,lsda,noncolin,lspinorb, &
                    nbnd,nelec, natomwfc, occupations_are_fixed, & 
                    h_energy,two_fermi_energies, [ef_up,ef_dw], et,wg,nkstot,xk,ngk_g,wk,    & 
@@ -1159,7 +1167,6 @@ MODULE pw_restart_new
     USE fft_base,         ONLY : dffts
     USE lsda_mod,         ONLY : lsda
     USE noncollin_module, ONLY : noncolin
-    USE ktetra,           ONLY : ntetra
     USE klist,            ONLY : nkstot, nelec
     USE wvfct,            ONLY : nbnd, npwx
     USE gvecw,            ONLY : ecutwfc
@@ -1870,8 +1877,8 @@ MODULE pw_restart_new
       ! 
       USE lsda_mod,         ONLY : lsda, nspin
       USE fixed_occ,        ONLY : tfixed_occ, f_inp
-      USE ktetra,           ONLY : ntetra, ltetra
-      USE klist,            ONLY : lgauss, ngauss, degauss, smearing
+      USE ktetra,           ONLY : ntetra, tetra_type
+      USE klist,            ONLY : ltetra, lgauss, ngauss, degauss, smearing
       USE electrons_base,   ONLY : nupdwn 
       USE wvfct,            ONLY : nbnd
       USE input_parameters, ONLY : input_parameters_occupations => occupations
@@ -1896,6 +1903,7 @@ MODULE pw_restart_new
       !
       lgauss = .FALSE. 
       ltetra = .FALSE. 
+      tetra_type = 0
       ngauss = 0
       input_parameters_occupations = TRIM ( band_struct_obj%occupations_kind%occupations ) 
       IF (TRIM(input_parameters_occupations) == 'tetrahedra' ) THEN 
@@ -1904,6 +1912,18 @@ MODULE pw_restart_new
         nk2 = band_struct_obj%starting_k_points%monkhorst_pack%nk2
         nk3 = band_struct_obj%starting_k_points%monkhorst_pack%nk3
         ntetra = 6* nk1 * nk2 * nk3 
+      ELSE IF (TRIM(input_parameters_occupations) == 'tetrahedra_lin' ) THEN 
+        ltetra = .TRUE. 
+        nk1 = band_struct_obj%starting_k_points%monkhorst_pack%nk1
+        nk2 = band_struct_obj%starting_k_points%monkhorst_pack%nk2
+        nk3 = band_struct_obj%starting_k_points%monkhorst_pack%nk3
+        tetra_type = 1
+      ELSE IF (TRIM(input_parameters_occupations) == 'tetrahedra_opt' ) THEN 
+        ltetra = .TRUE. 
+        nk1 = band_struct_obj%starting_k_points%monkhorst_pack%nk1
+        nk2 = band_struct_obj%starting_k_points%monkhorst_pack%nk2
+        nk3 = band_struct_obj%starting_k_points%monkhorst_pack%nk3
+        tetra_type = 2
       ELSE IF ( TRIM (input_parameters_occupations) == 'smearing') THEN 
         lgauss = .TRUE.  
         degauss = band_struct_obj%smearing%degauss
