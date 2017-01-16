@@ -31,14 +31,13 @@ SUBROUTINE setup_nscf ( newgrid, xq, elph_mat )
   USE force_mod,          ONLY : force
   USE basis,              ONLY : natomwfc
   USE klist,              ONLY : xk, wk, nks, nelec, degauss, lgauss, &
-                                 nkstot, qnorm
+                                 ltetra, nkstot, qnorm
   USE lsda_mod,           ONLY : lsda, nspin, current_spin, isk
   USE symm_base,          ONLY : s, t_rev, irt, ftau, nrot, nsym, &
                                  time_reversal
   USE wvfct,              ONLY : nbnd, nbndx
   USE control_flags,      ONLY : ethr, isolve, david, max_cg_iter, &
                                  noinv, use_para_diag
-!!!!!!!!!  USE el_phon,            ONLY : elph_mat
   USE mp_pools,           ONLY : kunit
   USE spin_orb,           ONLY : domag
   USE noncollin_module,   ONLY : noncolin
@@ -46,7 +45,7 @@ SUBROUTINE setup_nscf ( newgrid, xq, elph_mat )
                                  nk1, nk2, nk3, k1, k2, k3
   USE paw_variables,      ONLY : okpaw
   USE uspp_param,         ONLY : n_atom_wfc
- 
+  USE ktetra,             ONLY : tetra, tetra_type, opt_tetra_init
   USE lr_symm_base, ONLY : nsymq, invsymq, minus_q
   USE control_lr,   ONLY : lgamma
   !
@@ -126,6 +125,22 @@ SUBROUTINE setup_nscf ( newgrid, xq, elph_mat )
   !
   CALL set_kplusq( xk, wk, xq, nkstot, npk )
   !
+  ! ... set the granularity for k-point distribution
+  !
+  IF ( lgamma  ) THEN
+     kunit = 1
+  ELSE
+     kunit = 2
+  ENDIF
+  !
+  ! ... Map each k point in the irr.-BZ into tetrahedra
+  !
+  IF ( ltetra .AND. (tetra_type /= 0) ) THEN
+     IF (ALLOCATED(tetra)) DEALLOCATE(tetra)
+     CALL opt_tetra_init(nsymq, s, time_reversal .AND. minus_q, t_rev, at, bg,&
+          npk, k1, k2, k3, nk1, nk2, nk3, nkstot, xk, kunit)
+  END IF
+  !
   IF ( lsda ) THEN
      !
      ! ... LSDA case: two different spin polarizations,
@@ -160,14 +175,6 @@ SUBROUTINE setup_nscf ( newgrid, xq, elph_mat )
   ! the correct size of the interpolation table "qrad"
   !
   qnorm = sqrt(xq(1)**2 + xq(2)**2 + xq(3)**2)
-  !
-  ! ... set the granularity for k-point distribution
-  !
-  IF ( lgamma  ) THEN
-     kunit = 1
-  ELSE
-     kunit = 2
-  ENDIF
   !
   ! ... distribute k-points (and their weights and spin indices)
   !

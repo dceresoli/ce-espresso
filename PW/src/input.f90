@@ -590,12 +590,12 @@ SUBROUTINE iosys()
      ltetra = .true.
      tetra_type = 0
      !
-  CASE( 'tetrahedra_lin')
+  CASE( 'tetrahedra_lin', 'tetrahedra-lin')
      !
      ltetra = .true.
      tetra_type = 1
      !
-  CASE('tetrahedra_opt')
+  CASE('tetrahedra_opt', 'tetrahedra-opt')
      !
      ltetra = .true.
      tetra_type = 2
@@ -608,14 +608,16 @@ SUBROUTINE iosys()
   CASE DEFAULT
      !
      CALL errore( 'iosys','occupations ' // trim( occupations ) // &
-                & 'not implemented', 1 )
+                & ' not implemented', 1 )
      !
   END SELECT
   !
-  IF( lforce ) CALL infomsg( 'iosys', &
+  IF( ltetra ) THEN
+     IF( lforce ) CALL infomsg( 'iosys', &
        'BEWARE:  force calculation with tetrahedra (not recommanded)')
-  IF( lstres ) CALL infomsg( 'iosys', &
+     IF( lstres ) CALL infomsg( 'iosys', &
        'BEWARE: stress calculation with tetrahedra (not recommanded)')
+  END IF
   IF( nbnd < 1 ) &
      CALL errore( 'iosys', 'nbnd less than 1', nbnd )
   !

@@ -106,10 +106,11 @@ MODULE pw_restart
       USE wavefunctions_module, ONLY : evc
       USE klist,                ONLY : nks, nkstot, xk, ngk, igk_k, wk, qnorm, &
                                        lgauss, ngauss, degauss, nelec, &
-                                       two_fermi_energies, nelup, neldw, ltetra
+                                       two_fermi_energies, nelup, neldw
       USE start_k,              ONLY : nk1, nk2, nk3, k1, k2, k3, &
                                        nks_start, xk_start, wk_start
       USE ktetra,               ONLY : ntetra, tetra
+      USE klist,                ONLY : ltetra
       USE gvect,                ONLY : ngm, ngm_g, g, mill
       USE fft_base,             ONLY : dfftp
       USE basis,                ONLY : natomwfc
@@ -2067,7 +2068,7 @@ MODULE pw_restart
       USE lsda_mod,       ONLY : lsda, nspin
       USE fixed_occ,      ONLY : tfixed_occ, f_inp
       USE ktetra,         ONLY : ntetra, tetra
-      USE klist,          ONLY : lgauss, ngauss, degauss, smearing, ltetra
+      USE klist,          ONLY : ltetra, lgauss, ngauss, degauss, smearing
       USE electrons_base, ONLY : nupdwn 
       USE wvfct,          ONLY : nbnd
       !

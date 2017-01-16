@@ -22,6 +22,7 @@ default :
 	@echo ' run-tests-parallel          : run all tests in PARALLEL (4 MPI)'
 	@echo ' run-tests-XX-parallel       : run tests for XX={pw,cp} only, as above' 
 	@echo ' run-custom-test testdir=DIR : run test in DIR only (serial)'
+	@echo ' run-custom-test-parallel testdir=DIR : run test in DIR only (parallel 4 MPI)'
 	@echo ' compare                     : compare last output with reference'
 	@echo ' clean                       : clean stdout/sderr of all tests'
 	@echo ' '
@@ -61,6 +62,8 @@ run-tests-epw-serial : prolog pseudo
 run-tests-epw-parallel : prolog pseudo
 	env QE_USE_MPI=1 ${TESTCODE_DIR}/bin/testcode.py --verbose --category=epw_all
 
+run-travis : prolog pseudo
+	env QE_USE_MPI=0 ${TESTCODE_DIR}/bin/testcode.py --verbose --category=epw_base
 
 run-custom-test : run-custom-test-serial
 
@@ -111,6 +114,10 @@ clean:
 	@rm -f pw_langevin/trajectory-pwscf.xyz
 # Special cases for CP	
 	@rm -f cp_si/qe_input.xml cp_sio2/qe_input.xml cp_o2/qe_input.xml cp_h2o/qe_input.xml
+# Cleaning EPW final files
+	@rm -rf epw_*/_ph0 epw_*/*.save epw_*/*.wfc* epw_*/*.dyn*
+# Special case EPW
+	@rm -rf epw_trev/save	
 	@rm -f userconfig
 
 # Calling 'purge' means remove all reference outputs... be careful!
