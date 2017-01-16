@@ -19,7 +19,7 @@ No warrany, use at your own risk!
 
 * support for Rydberg pseudopotentials, having larger radial mesh and large cutoff
 * always force positive charge density
-* `conv_thr_init ` is enforced also from the 2nd SCF iteration on
+* `conv_thr_init` is enforced also from the 2nd SCF iteration on
 * complete list of atoms in `hubbard_l` and `tabd`
 * Ewald parameter computed consistently in all routines
 * possibility to control what to mix: density, magnetization, Hubbard occupations, PAW projectors
