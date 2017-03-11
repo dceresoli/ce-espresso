@@ -51,7 +51,7 @@ SUBROUTINE read_extpot
     ! try to open file
     if (ionode) then
         iupot = find_free_unit()
-        open(unit=iupot, name=filename, status='old', iostat=err)
+        open(unit=iupot, file=filename, status='old', iostat=err)
         if (err /= 0) call errore("read_extpot", "error opening file "//trim(filename), err)
 
 

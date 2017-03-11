@@ -1,25 +1,3 @@
-<<<<<<< HEAD
-**/*.o
-**/*.a
-**/*.mod
-**/*.x
-**/*~
-bin
-config.log
-config.status
-configure.msg
-make.inc*
-iotk
-S3DE
-Modules/version.f90
-Modules/version.f90.tmp
-include/c_defs.h
-include/configure.h
-include/fft_defs.h
-install/make_lapack.inc
-install/make_wannier90.inc
-
-=======
 *~
 *.o
 *.mod
@@ -35,4 +13,5 @@ include/c_defs.h
 install/config.log
 install/config.status
 install/configure.msg
->>>>>>> qef/q-e/master
+Modules/version.f90
+Modules/version.f90.tmp
