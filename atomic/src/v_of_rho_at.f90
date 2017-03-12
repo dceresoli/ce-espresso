@@ -86,6 +86,15 @@ subroutine v_of_rho_at (rho,rhoc,vh,vxc,exc,excgga,vnew,nlcc,iflag)
      deallocate(egc)
      deallocate(vgc)
   end if
+
+  !<ceres>
+  open(unit=91,file='vhxc.dat',status='unknown')
+  do i=1,grid%mesh
+     write(91,'(4(E12.4,4X))') grid%r(i), vh(i), vxc(i,1), vxc(i,2)
+  enddo
+  close(unit=91)
+  !</ceres>
+
 !
 !  Calculate the self consistent potential
 !
