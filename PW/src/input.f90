@@ -194,7 +194,7 @@ SUBROUTINE iosys()
 
   !
   USE symm_base, ONLY : no_t_rev_ => no_t_rev, nofrac, allfrac, &
-                        nosym_ => nosym, nosym_evc_=> nosym_evc
+                        nosym_ => nosym, nosym_evc_=> nosym_evc, spacegroup
   !
   USE bfgs_module,   ONLY : bfgs_ndim_        => bfgs_ndim, &
                             trust_radius_max_ => trust_radius_max, &
@@ -1319,6 +1319,7 @@ SUBROUTINE iosys()
                                                    &number',1 )
      CALL sup_spacegroup(rd_pos,sp_pos,rd_for,rd_if_pos,space_group,nat,&
               uniqueb,rhombohedral,origin_choice,ibrav_sg)
+     spacegroup = space_group
      IF (ibrav==-1) THEN
         ibrav=ibrav_sg
      ELSEIF (ibrav /= ibrav_sg) THEN
@@ -1571,7 +1572,7 @@ SUBROUTINE iosys()
      ! The next two lines have been moved before the call to read_config_from_file:
      !      at_old    = at
      !      omega_old = omega
-     IF ( cell_factor_ <= 0.D0 ) cell_factor_ = 1.2D0
+     IF ( cell_factor_ <= 0.0_dp ) cell_factor_ = 2.0_dp
      !
      IF ( cmass <= 0.D0 ) &
         CALL errore( 'iosys', &

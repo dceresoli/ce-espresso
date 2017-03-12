@@ -12,12 +12,13 @@ MODULE pw_restart_new
   ! ... New PWscf I/O using xml schema and hdf5 binaries
   !
   USE qes_module
-  USE qexsd_module, ONLY: qexsd_init_schema, qexsd_openschema, qexsd_closeschema, &
-                          qexsd_init_convergence_info, qexsd_init_algorithmic_info, & 
-                          qexsd_init_atomic_species, qexsd_init_atomic_structure, &
+  USE qexsd_module, ONLY: qexsd_init_schema, qexsd_openschema, qexsd_closeschema,      &
+                          qexsd_init_convergence_info, qexsd_init_algorithmic_info,    & 
+                          qexsd_init_atomic_species, qexsd_init_atomic_structure,      &
                           qexsd_init_symmetries, qexsd_init_basis_set, qexsd_init_dft, &
-                          qexsd_init_magnetization,qexsd_init_band_structure,  &
-                          qexsd_init_total_energy,qexsd_init_forces,qexsd_init_stress, &
+                          qexsd_init_magnetization,qexsd_init_band_structure,          &
+                          qexsd_init_dipole_info, qexsd_init_total_energy,             &
+                          qexsd_init_forces,qexsd_init_stress,                         &
                           qexsd_init_outputElectricField, qexsd_input => qexsd_input_obj
   USE iotk_module
   USE io_global, ONLY : ionode, ionode_id
@@ -76,7 +77,8 @@ MODULE pw_restart_new
                                        is_hubbard
       USE spin_orb,             ONLY : lspinorb, domag
       USE symm_base,            ONLY : nrot, nsym, invsym, s, ft, irt, &
-                                       t_rev, sname, time_reversal, no_t_rev
+                                       t_rev, sname, time_reversal, no_t_rev,&
+                                       spacegroup
       USE lsda_mod,             ONLY : nspin, isk, lsda, starting_magnetization, magtot, absmag
       USE noncollin_module,     ONLY : angle1, angle2, i_cons, mcons, bfield, magtot_nc, &
                                        lambda
@@ -86,7 +88,7 @@ MODULE pw_restart_new
       USE scf,                  ONLY : rho
       USE force_mod,            ONLY : lforce, sumfor, force, sigma, lstres
       USE extfield,             ONLY : tefield, dipfield, edir, etotefield, &
-                                       emaxpos, eopreg, eamp, &
+                                       emaxpos, eopreg, eamp, el_dipole, ion_dipole,&
                                        monopole, zmon, relaxz, block, block_1,&
                                        block_2, block_height ! TB
       USE io_rho_xml,           ONLY : write_rho
@@ -106,7 +108,7 @@ MODULE pw_restart_new
       USE london_module,        ONLY : scal6, lon_rcut, in_c6
       USE xdm_module,           ONLY : xdm_a1=>a1i, xdm_a2=>a2i
       USE tsvdw_module,         ONLY : vdw_isolated, vdw_econv_thr
-      USE input_parameters,     ONLY : space_group, verbosity, calculation, ion_dynamics, starting_ns_eigenvalue, &
+      USE input_parameters,     ONLY : verbosity, calculation, ion_dynamics, starting_ns_eigenvalue, &
                                        vdw_corr, london, input_parameters_occupations => occupations
       USE bp,                   ONLY : lelfield, lberry, bp_mod_el_pol => el_pol, bp_mod_ion_pol => ion_pol
       !
@@ -156,10 +158,6 @@ MODULE pw_restart_new
       ngm_g = ngm
       CALL mp_sum( ngm_g, intra_bgrp_comm )
       ! 
-      IF (tefield .AND. dipfield ) THEN 
-          CALL init_dipole_info(qexsd_dipol_obj, rho%of_r)   
-          qexsd_dipol_obj%tagname = "dipoleInfo"
-      END IF
       ! 
       !
       ! XML descriptor
@@ -232,7 +230,7 @@ MODULE pw_restart_new
 !-------------------------------------------------------------------------------
          !         
          CALL qexsd_init_atomic_structure(output%atomic_structure, nsp, atm, ityp, &
-              nat, tau, 'Bohr', alat, alat*at(:,1), alat*at(:,2), alat*at(:,3), ibrav)
+              nat, alat*tau, alat, alat*at(:,1), alat*at(:,2), alat*at(:,3), ibrav)
          !
 !-------------------------------------------------------------------------------
 ! ... SYMMETRIES
@@ -265,7 +263,7 @@ MODULE pw_restart_new
                END DO symmetries_loop
             END IF
          END IF
-         CALL qexsd_init_symmetries(output%symmetries, nsym, nrot, space_group, &
+         CALL qexsd_init_symmetries(output%symmetries, nsym, nrot, spacegroup,&
               s, ft, sname, t_rev, nat, irt,symop_2_class(1:nrot), verbosity, &
               noncolin)
          !
@@ -348,8 +346,8 @@ MODULE pw_restart_new
 !-------------------------------------------------------------------------------------------
          !
          IF (tefield) THEN
-            CALL  qexsd_init_total_energy(output%total_energy,etot/e2,eband/e2,ehart/e2,vtxc/e2,etxc/e2, &
-                 ewld/e2,degauss/e2,demet/e2, etotefield/e2)
+            CALL  qexsd_init_total_energy(output%total_energy,etot,eband,ehart,vtxc,etxc, &
+                 ewld, degauss ,demet , etotefield )
          ELSE 
             CALL  qexsd_init_total_energy(output%total_energy,etot,eband,ehart,vtxc,etxc, &
                  ewld,degauss,demet)
@@ -396,6 +394,10 @@ MODULE pw_restart_new
                  lberry, bp_obj=qexsd_bp_obj) 
          ELSE IF ( tefield .AND. dipfield  ) THEN 
             output%electric_field_ispresent = .TRUE.
+            CALL qexsd_init_dipole_info(qexsd_dipol_obj, el_dipole, ion_dipole, edir, eamp, &
+                                  emaxpos, eopreg )  
+           qexsd_dipol_obj%tagname = "dipoleInfo"
+
             CALL  qexsd_init_outputElectricField(output%electric_field, lelfield, tefield, dipfield, &
                  lberry, dipole_obj = qexsd_dipol_obj )                     
          ELSE 
@@ -1383,6 +1385,7 @@ MODULE pw_restart_new
     END DO loop_on_atoms
     
     IF ( atomic_structure%alat_ispresent ) alat = atomic_structure%alat 
+    tau(:,1:nat) = tau(:,1:nat)/alat  
     ! 
     !pseudo_dir = TRIM(restart_obj%control_variables%pseudo_dir)//'/'
     pseudo_dir_cur = TRIM ( dirname)//'/'  
