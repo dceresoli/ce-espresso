@@ -100,7 +100,7 @@ FFLAGS_NOMAIN   =
 
 LD             = mpif90
 LDFLAGS        = -g -pthread
-LD_LIBS        = -lxc
+LD_LIBS        = -lxcf90 -lxc
 
 # External Libraries (if any) : blas, lapack, fft, MPI
 
