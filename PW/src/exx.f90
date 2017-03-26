@@ -58,11 +58,8 @@ MODULE exx
   COMPLEX(DP), ALLOCATABLE :: exxbuff(:,:,:)
                                          ! temporary buffer for wfc storage
   !
-#if defined(__EXX_ACE)
   LOGICAL :: use_ace=.true.              !  true: Use Lin Lin's ACE method
-#else
-  LOGICAL :: use_ace=.false.             ! false: Use complete Vx
-#endif
+                                         !  set to .false. to disable ACE
   COMPLEX(DP), ALLOCATABLE :: xi(:,:,:)  ! ACE projectors
   INTEGER :: nbndproj
   LOGICAL :: domat
@@ -701,17 +698,16 @@ MODULE exx
   !------------------------------------------------------------------------
   !
   !------------------------------------------------------------------------
-  SUBROUTINE exx_restart(l_exx_was_active)
+  SUBROUTINE exx_restart( set_ace )
      !------------------------------------------------------------------------
      !This SUBROUTINE is called when restarting an exx calculation
      USE funct,                ONLY : get_exx_fraction, start_exx, &
                                       exx_is_active, get_screening_parameter
 
      IMPLICIT NONE
-     LOGICAL, INTENT(in) :: l_exx_was_active
+     LOGICAL, INTENT(in) :: set_ace
      !
-     IF (.not. l_exx_was_active ) RETURN ! nothing had happened yet
-     !
+     use_ace = set_ace
      erfc_scrlen = get_screening_parameter()
      exxdiv = exx_divergence()
      exxalfa = get_exx_fraction()
