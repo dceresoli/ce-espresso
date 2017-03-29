@@ -58,14 +58,7 @@ subroutine tpsscxc( rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c )
   ! exchange
   call metax(rho,grho,tau,sx,v1x,v2x,v3x)
   ! correlation
-#if 0
-  call metac(rho,grho,tau,sc,v1c,v2c,v3c)
-#else
-     sc = 0.0_DP
-     v1c = 0.0_DP
-     v2c = 0.0_DP
-     v3c=0.0_DP
-#endif
+  !!call metac(rho,grho,tau,sc,v1c,v2c,v3c)
   !
   !
   return  

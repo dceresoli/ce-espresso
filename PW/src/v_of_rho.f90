@@ -206,8 +206,7 @@ SUBROUTINE v_xc_meta( rho, rho_core, rhog_core, etxc, vtxc, v, kedtaur )
            ! h contains D(rho*Exc)/D(|grad rho|) * (grad rho) / |grad rho|
            h(:,k,1) =  (v2x + v2c)*grho (:,k,1) *e2
            
-           !!kedtaur(k,1)=  (v3x + v3c) * 0.5d0 * e2
-           kedtaur(k,1)=  (v3x + v3c) * 0.5d0  ! Hartree^{-1} to Rydberg^{-1}
+           kedtaur(k,1)=  (v3x + v3c) * 0.5d0 * e2
            
            etxc = etxc +  (ex + ec) *e2 !* segno
            vtxc = vtxc + (v1x+v1c)*e2*arho
@@ -284,6 +283,10 @@ SUBROUTINE v_xc_meta( rho, rho_core, rhog_core, etxc, vtxc, v, kedtaur )
         
      end if
   end do
+  do k = 1, 50
+     write(stdout,'(5(F10.4,2X))') rho%of_r(k,1), rho%kin_r(k,1), v(k,1), h(1,k,1), kedtaur(k,1)
+  enddo
+  STOP
   !
   !
   ALLOCATE( dh( dfftp%nnr ) )    
