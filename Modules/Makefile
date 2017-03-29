@@ -139,6 +139,7 @@ int_to_char.o \
 latgen.o \
 linpack.o \
 metagga.o \
+metagga_libxc.o \
 matches.o \
 plot_io.o \
 radial_gradients.o \

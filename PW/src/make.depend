@@ -1014,7 +1014,6 @@ manypw.o : ../../Modules/environment.o
 manypw.o : ../../Modules/input_parameters.o
 manypw.o : ../../Modules/io_global.o
 manypw.o : ../../Modules/mp.o
-manypw.o : ../../Modules/mp_global.o
 manypw.o : ../../Modules/mp_images.o
 manypw.o : ../../Modules/mp_world.o
 manypw.o : ../../Modules/read_input.o
@@ -1718,6 +1717,7 @@ rotate_wfc_k.o : ../../Modules/mp_bands.o
 rotate_wfc_k.o : ../../Modules/mp_diag.o
 run_driver.o : ../../Modules/cell_base.o
 run_driver.o : ../../Modules/check_stop.o
+run_driver.o : ../../Modules/command_line_options.o
 run_driver.o : ../../Modules/control_flags.o
 run_driver.o : ../../Modules/fsockets.o
 run_driver.o : ../../Modules/io_global.o

@@ -161,7 +161,9 @@ lsda_functionals.o : constants.o
 lsda_functionals.o : kind.o
 metagga.o : constants.o
 metagga.o : kind.o
-metagga.o : libxc.o
+metagga_libxc.o : funct.o
+metagga_libxc.o : kind.o
+metagga_libxc.o : libxc.o
 mm_dispersion.o : cell_base.o
 mm_dispersion.o : io_global.o
 mm_dispersion.o : ions_base.o

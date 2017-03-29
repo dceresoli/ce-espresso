@@ -15,6 +15,7 @@ AC_ARG_WITH(hdf5,
 
 hdf5_libs=""
 have_hdf5=0
+hdf5_line="@delete@"
 
 if test "$use_parallel" -ne 0; then
 

@@ -98,6 +98,9 @@ X_AC_QE_XML()
 # Setting HDF5...
 X_AC_QE_HDF5()
 
+# Setting libxc...
+ACX_LIBXC()
+
 # Checking SIGNAL...
 X_AC_QE_SIGNAL()
 

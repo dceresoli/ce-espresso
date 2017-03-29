@@ -6,23 +6,25 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !
-!-------------------------------------------------------------------------
+!=========================================================================
 !
 !                        META-GGA FUNCTIONALS
 !
-!  Available functionals : 
-!           - TPSS (Tao, Perdew, Staroverov & Scuseria)
-!           - TB09 (via libxc)
-!           - M06L
+!  Available functionals: 
+!  - TPSS (Tao, Perdew, Staroverov & Scuseria)
+!  - M06L
 !
+!  Available functionals via LIBXC:
+!  - TPSS
+!  - TB09
+!  - SCAN
 !=========================================================================
-!   
-!-------------------------------------------------------------------------
-!
+
+  
+!=========================================================================
 !                             TPSS
-!
-!-------------------------------------------------------------------------
-#undef __LIBXC
+!=========================================================================
+#if !defined(__LIBXC)
 !-------------------------------------------------------------------------
 subroutine tpsscxc( rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c )
   !-----------------------------------------------------------------------
@@ -37,45 +39,9 @@ subroutine tpsscxc( rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c )
   !                       v3x= D(E_x)/D(tau)
   !
   USE kinds,            ONLY : DP
-#if defined(__LIBXC)
-  use xc_f90_types_m
-  use xc_f90_lib_m
-#endif
   implicit none  
   real(DP), intent(in) :: rho, grho, tau
   real(dp), intent(out):: sx, sc, v1x, v2x, v3x, v1c, v2c, v3c
-#if defined(__LIBXC)
-  TYPE(xc_f90_pointer_t) :: xc_func
-  TYPE(xc_f90_pointer_t) :: xc_info
-  integer :: size = 1
-  integer :: func_id = 202  !
-  real(dp) :: lapl_rho, vlapl_rho ! not used in TPSS
- 
-  lapl_rho = grho
-
-  ! exchange  
-  func_id = 202
-  call xc_f90_func_init(xc_func, xc_info, func_id, XC_UNPOLARIZED)    
-  call xc_f90_mgga_exc_vxc(xc_func, size, rho, grho, lapl_rho, 0.5_dp*tau,&
-                               sx, v1x, v2x, vlapl_rho, v3x)  
-  call xc_f90_func_end(xc_func)	
-  
-  sx  = sx * rho
-  v2x = v2x*2.0_dp
-  v3x = 0.5_dp*v3x
-
-  ! correlation
-  func_id = 231  ! Perdew, Tao, Staroverov & Scuseria correlation  
-  call xc_f90_func_init(xc_func, xc_info, func_id, XC_UNPOLARIZED)   
-  call xc_f90_mgga_exc_vxc(xc_func,size , rho, grho, lapl_rho, 0.5_dp*tau,&
-                               sc, v1c, v2c, vlapl_rho, v3c)  
-  call xc_f90_func_end(xc_func)
-
-  sc  = sc * rho
-  v2c = v2c*2.0_dp
-  v3c = 0.5_dp*v3c       
-
-#else
   real(DP), parameter :: small = 1.E-10_DP
 
   if (rho.le.small) then  
@@ -101,22 +67,16 @@ subroutine tpsscxc( rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c )
      v3c=0.0_DP
 #endif
   !
-#endif
   !
   return  
 end subroutine tpsscxc
+#endif
 
-#define __LIBXC
-
-!-------------------------------------------------------------------------
+!  ==--------------------------------------------------------------==
+!  ==      TPSS meta-GGA exchange potential and energy             ==
+!  ==--------------------------------------------------------------==
 subroutine metax(rho,grho2,tau,ex,v1x,v2x,v3x)
-  !    --------------------------------------------------------------==
-  !     ==  TPSS meta-GGA exchange potential and energy                    
-  !  ==                                                              ==
-  !  ==--------------------------------------------------------------==
-  
   USE kinds,            ONLY : DP
-
   !  NOTA BENE:            E_x(rho,grho)=rho\epsilon_x(rho,grho)
   !  ex = E_x(rho,grho)    NOT \epsilon_x(rho,grho)
   !  v1x= D(E_x)/D(rho)
@@ -142,7 +102,6 @@ subroutine metax(rho,grho2,tau,ex,v1x,v2x,v3x)
   !  fxz=d Fx / d z
   real(DP) fx,f1x,f2x,f3x
  
-  !  ==--------------------------------------------------------------==
   if(abs(tau).lt.small) then
     ex=0.0_DP
     v1x=0.0_DP
@@ -159,14 +118,14 @@ subroutine metax(rho,grho2,tau,ex,v1x,v2x,v3x)
   v3x=ex*f3x
   ex =ex*fx
   
-  !  ==--------------------------------------------------------------==
   return
 end subroutine metax
-!==   ------------------------------------------------------------------
+
+
+!  ==--------------------------------------------------------------==
+!  ==      TPSS meta-GGA exchange potential and energy             ==
+!  ==--------------------------------------------------------------==
 subroutine metac(rho,grho2,tau,ec,v1c,v2c,v3c)
-  !==   ------------------------------------------------------------------
-  !  TPSS meta-GGA correlation energy and potentials
-  !==   ------------------------------------------------------------------
   USE kinds,            ONLY : DP
   implicit none
   !  INPUT
@@ -260,9 +219,10 @@ subroutine metac(rho,grho2,tau,ec,v1c,v2c,v3c)
 
   ec=rho*ec_rev*(1.0_DP+dd*ec_rev*z2*z)  !-rho*ec_unif
   v1c=v1c !-vc_unif
-  !  ==--------------------------------------------------------------==
   return
 end subroutine metac
+
+
 !-------------------------------------------------------------------------
 subroutine metaFX(rho,grho2,tau,fx,f1x,f2x,f3x)
   !-------------------------------------------------------------------------
@@ -364,10 +324,10 @@ subroutine metaFX(rho,grho2,tau,fx,f1x,f2x,f3x)
   localdp=0.0_DP
   dz=-z/tau
   f3x=fxz*dz
-  
 
   return
 end subroutine metaFX
+
 
 !-------------------------------------------------------------------
 subroutine tpsscx_spin(rhoup,rhodw,grhoup2,grhodw2,tauup,taudw,sx,&
@@ -737,14 +697,12 @@ subroutine metac_spin(rho,zeta,grhoup,grhodw, &
   
   return
 end subroutine metac_spin
-!
-!-------------------------------------------------------------------------
-!
-!                          END TPSSS
-!-------------------------------------------------------------------------
-!
+
+
 !=========================================================================
-!
+!                             M06L
+!=========================================================================
+#if !defined(__LIBXC)
 !-------------------------------------------------------------------------
 !
 !                             M06L
@@ -768,7 +726,6 @@ end subroutine metac_spin
 !-------------------------------------------------------------------------
 !
 subroutine m06lxc (rho, grho2, tau, ex, ec, v1x, v2x, v3x, v1c, v2c, v3c)
-
   !-----------------------------------------------------------------------
   !    
   !
@@ -806,13 +763,13 @@ subroutine m06lxc (rho, grho2, tau, ex, ec, v1x, v2x, v3x, v1c, v2c, v3c)
   v2c = 0.5_dp * v2c
   !
 end subroutine m06lxc
+#endif
+
 
 !-------------------------------------------------------------------------
-!
 subroutine m06lxc_spin (rhoup, rhodw, grhoup2, grhodw2, tauup, taudw,      &
           &             ex, ec, v1xup, v1xdw, v2xup, v2xdw, v3xup, v3xdw,  &
           &             v1cup, v1cdw, v2cup, v2cdw, v3cup, v3cdw)
-
   !-----------------------------------------------------------------------
   !    
   !
@@ -846,11 +803,7 @@ subroutine m06lxc_spin (rhoup, rhodw, grhoup2, grhodw2, tauup, taudw,      &
 end subroutine m06lxc_spin
 
 
-!===============================  M06L exchange ==========================
-
-
 subroutine m06lx (rho, grho2, tau, ex, v1x, v2x, v3x)
-
 !_________________________________________________________________________
   
   use kinds, ONLY  : dp
@@ -1391,158 +1344,17 @@ subroutine gvt4 (x, z, a, b, c, d, e, f, alpha, hg, dh_dx, dh_dz)
   
 end subroutine gvt4
 
-!-------------------------------------------------------------------------
-!
-!                          END M06L
-!
-#if 0
-!=========================================================================
-!
-!                          TB09
-!-----------------------------------------------------------------------
 
-subroutine tb09cxc(rho, grho, tau, sx, sc, v1x, v2x,v3x,v1c, v2c,v3c)
-
-  USE kinds,            ONLY : DP
-#if defined(__LIBXC)
-  use xc_f90_types_m
-  use xc_f90_lib_m
-#endif
-  implicit none  
-  real(DP), intent(in) :: rho, grho, tau
-  real(dp), intent(out):: sx, sc, v1x, v2x, v3x, v1c, v2c, v3c
-#if defined(__LIBXC)
-  TYPE(xc_f90_pointer_t) :: xc_func
-  TYPE(xc_f90_pointer_t) :: xc_info
-  integer :: size = 1
-  integer :: func_id = 208  !Tran & Blaha correction to Becke & Johnson
-  real(dp) :: lapl_rho, vlapl_rho ! not used in TB09
-  
-  lapl_rho = grho
-  
-  ! ---------------------------- Exchange
-  
-  func_id = 208  !Tran & Blaha correction to Becke & Johnson  -- TB09 
- 
-  call xc_f90_func_init(xc_func, xc_info, func_id, XC_UNPOLARIZED)    
-  call xc_f90_mgga_vxc(xc_func, size, rho, grho, lapl_rho, 0.5_dp*tau, &
-      v1x, v2x, vlapl_rho, v3x)  
-  call xc_f90_func_end(xc_func)	
-  
-  sx = 0.0d0		       
-  v2x = v2x*2.0_dp
-  v3x = v3x*0.5_dp
-
-  ! ---------------------------- Correlation  
-  
-  func_id = 231  ! Perdew, Tao, Staroverov & Scuseria correlation  -- TPSS
-  
-  call xc_f90_func_init(xc_func, xc_info, func_id, XC_UNPOLARIZED)   
-  call xc_f90_mgga_exc_vxc(xc_func, size, rho, grho, lapl_rho, 0.5_dp*tau, &
-     sc, v1c, v2c, vlapl_rho, v3c)  
-  call xc_f90_func_end(xc_func)
-
-  sc = sc * rho			       
-  v2c = v2c*2.0_dp
-  v3c = v3c*0.5_dp
-#else
-  sx=0.0_dp; sc=0.0_dp; v1x=0.0_dp; v2x=0.0_dp; v3x=0.0_dp; v1c=0.0_dp; v2c=0.0_dp; v3c=0.0_dp
-  call errore('tb09','need libxc',1)
-#endif
-end subroutine tb09cxc
-
-!c     ==================================================================
-#endif
-    
-
-!======================================================================
-! Generic meta-GGA functional via LibXC
-!======================================================================
-subroutine mgga_libxc(X, C, rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c)
-#if defined(__LIBXC)
-  USE kinds,            ONLY : DP
-  USE funct,            ONLY : libxc_major, libxc_minor, libxc_micro, get_libxc_version
-  use xc_f90_types_m
-  use xc_f90_lib_m
-  implicit none  
-  integer, intent(in) :: X, C
-  real(dp), intent(in) :: rho, grho, tau
-  real(dp), intent(out):: sx, sc, v1x, v2x, v3x, v1c, v2c, v3c
-
-  TYPE(xc_f90_pointer_t) :: xc_func
-  TYPE(xc_f90_pointer_t) :: xc_info
-  integer, SAVE :: major=0, minor=0, micro=0
-  integer :: size = 1
-  integer :: flags
-  real(dp) :: lapl_rho, vlapl_rho ! not used?
-
-  if (libxc_major == 0) call get_libxc_version
-  if (libxc_major < 3 .or. (libxc_major == 3 .and. libxc_minor /= -1)) & 
-      call errore('mgga_libxc','please, recompile with LibXC trunk (i.e. >3.0.0))',1)
- 
-  lapl_rho = grho
-
-#if 1
-  ! exchange
-  call xc_f90_func_init(xc_func, xc_info, X, XC_UNPOLARIZED)
-  flags = xc_f90_info_flags(xc_info)
-  if (and(flags, 1) == 1) then
-     call xc_f90_mgga_exc_vxc(xc_func, size, rho, grho, lapl_rho, 1.0d0*tau,&
-                              sx, v1x, v2x, vlapl_rho, v3x)  
-     sx = sx * rho
-  else
-     call xc_f90_mgga_vxc(xc_func, size, rho, grho, lapl_rho, 1.0d0*tau,&
-                          v1x, v2x, vlapl_rho, v3x)  
-     sx = 0.d0
-  endif
-  call xc_f90_func_end(xc_func)
-  v2x = v2x*2.d0   ! Hartree to Rydberg
-  v3x = v3x*0.5d0  ! Hartree^{-1} to Rydberg^{-1}
-#else
-  sx = 0.d0
-  v2x = 0.d0
-  v3x = 0.d0
-#endif
-
-#if 1
-  ! correlation  
-  call xc_f90_func_init(xc_func, xc_info, C, XC_UNPOLARIZED)   
-  flags = xc_f90_info_flags(xc_info)
-  if (and(flags, 1) == 1) then
-     call xc_f90_mgga_exc_vxc(xc_func, size, rho, grho, lapl_rho, 1.0d0*tau, &
-                              sc, v1c, v2c, vlapl_rho, v3c)  
-     sc = sc * rho
-  else
-     call xc_f90_mgga_vxc(xc_func, size, rho, grho, lapl_rho, 1.0d0*tau, &
-                          v1c, v2c, vlapl_rho, v3c)
-     sc = 0.d0
-  endif
-  call xc_f90_func_end(xc_func)
-  v2c = v2c*2.d0   ! Hartree to Rydberg
-  v3c = v3c*0.5d0  ! Hartree^{-1} to Rydberg^{-1}
-#else
-  sc = 0.d0
-  v2c = 0.d0
-  v3c = 0.d0
-#endif
-#else
-  call errore('mgga_libxc','please, recompile with LibXC trunk (i.e. >3.0.0))',1)
-#endif
-
-end subroutine mgga_libxc
-
-#if 1
 !======================================================================
 ! TB09 meta-GGA
 !======================================================================
+#if !defined(__LIBXC)
 subroutine tb09cxc(rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c)
   USE kinds,            ONLY : DP
   implicit none  
   real(DP), intent(in) :: rho, grho, tau
   real(dp), intent(out):: sx, sc, v1x, v2x, v3x, v1c, v2c, v3c
-  ! XC_MGGA_X_TB09 = 208
-  ! XC_MGGA_C_TPSS = 231
-  call mgga_libxc(208, 231, rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c)
+  call errore('tb09cxc', 'TB09 available only with libXC', 1)
 end subroutine tb09cxc
 #endif
 
@@ -1550,74 +1362,13 @@ end subroutine tb09cxc
 !======================================================================
 ! SCAN meta-GGA
 !======================================================================
+#if !defined(__LIBXC)
 subroutine SCANcxc(rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c)
   USE kinds,            ONLY : DP
   implicit none  
   real(DP), intent(in) :: rho, grho, tau
   real(dp), intent(out):: sx, sc, v1x, v2x, v3x, v1c, v2c, v3c
-  ! XC_MGGA_X_SCAN = 263
-  ! XC_MGGA_C_SCAN = 267
-  call mgga_libxc(263, 267, rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c)
+  call errore('SCANcxc', 'SCAN available only with libXC', 1)
 end subroutine SCANcxc
-
-
-
-
-
-!======================================================================
-! SCAN meta-GGA
-!======================================================================
-subroutine SCANcxc(rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c)
-  USE kinds,            ONLY : DP
-#if defined(__LIBXC)
-  USE funct,            ONLY : libxc_major, libxc_minor, libxc_micro, get_libxc_version
-  use xc_f90_types_m
-  use xc_f90_lib_m
 #endif
-  implicit none  
-  real(DP), intent(in) :: rho, grho, tau
-  real(dp), intent(out):: sx, sc, v1x, v2x, v3x, v1c, v2c, v3c
-
-#if defined(__LIBXC)
-  TYPE(xc_f90_pointer_t) :: xc_func
-  TYPE(xc_f90_pointer_t) :: xc_info
-  integer, SAVE :: major=0, minor=0, micro=0
-  integer :: size = 1
-  integer :: func_id
-  real(dp) :: lapl_rho, vlapl_rho ! not used?
-
-  if (libxc_major == 0) call get_libxc_version
-  if (libxc_major < 3 .or. (libxc_major == 3 .and. libxc_minor /= -1)) & 
-      call errore('SCAN meta-GGA','please, recompile with LibXC trunk (i.e. >3.0.0))',1)
- 
-  lapl_rho = grho
-
-  ! exchange
-  func_id = 263  ! XC_MGGA_X_SCAN
- 
-  call xc_f90_func_init(xc_func, xc_info, func_id, XC_UNPOLARIZED)
-  call xc_f90_mgga_exc_vxc(xc_func, size, rho, grho, lapl_rho, 0.5_dp*tau,&
-                           sx, v1x, v2x, vlapl_rho, v3x)  
-  call xc_f90_func_end(xc_func)
-  sx = 0.0d0
-  v2x = v2x*2.0_dp
-  v3x = v3x*0.5_dp
-
-  ! correlation  
-  func_id = 267  ! XC_MGGA_C_SCAN
-  call xc_f90_func_init(xc_func, xc_info, func_id, XC_UNPOLARIZED)   
-  call xc_f90_mgga_exc_vxc(xc_func, size, rho, grho, lapl_rho, 0.5_dp*tau, &
-                           sc, v1c, v2c, vlapl_rho, v3c)  
-  call xc_f90_func_end(xc_func)
-
-  sc = sc * rho
-  v2c = v2c*2.0_dp
-  v3c = v3c*0.5_dp
-
-#else
-  sx=0.0_dp; sc=0.0_dp; v1x=0.0_dp; v2x=0.0_dp; v3x=0.0_dp; v1c=0.0_dp; v2c=0.0_dp; v3c=0.0_dp
-  call errore('SCAN meta-GGA','please, recompile with LibXC trunk (i.e. >3.0.0))',1)
-#endif
-
-end subroutine SCANcxc
 

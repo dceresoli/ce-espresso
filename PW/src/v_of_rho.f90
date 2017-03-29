@@ -201,12 +201,13 @@ SUBROUTINE v_xc_meta( rho, rho_core, rhog_core, etxc, vtxc, v, kedtaur )
            
            call tau_xc (arho, grho2(1),atau, ex, ec, v1x, v2x,v3x,v1c, v2c,v3c)
            
-           v(k, 1) =  (v1x + v1c )*e2 
+           v(k, 1) =  (v1x + v1c) * e2  ! Hartree to Rydberg 
            
            ! h contains D(rho*Exc)/D(|grad rho|) * (grad rho) / |grad rho|
            h(:,k,1) =  (v2x + v2c)*grho (:,k,1) *e2
            
-           kedtaur(k,1)=  (v3x + v3c) * 0.5d0 * e2
+           !!kedtaur(k,1)=  (v3x + v3c) * 0.5d0 * e2
+           kedtaur(k,1)=  (v3x + v3c) * 0.5d0  ! Hartree^{-1} to Rydberg^{-1}
            
            etxc = etxc +  (ex + ec) *e2 !* segno
            vtxc = vtxc + (v1x+v1c)*e2*arho
