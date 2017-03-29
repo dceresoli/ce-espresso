@@ -198,7 +198,8 @@ SUBROUTINE v_xc_meta( rho, rho_core, rhog_core, etxc, vtxc, v, kedtaur )
         
         if ( (arho > eps8) .and. (grho2 (1) > eps12) .and. &
                                  (abs(atau) > eps8)) then
-           
+
+           ex=0.d0; ec=0.d0; v1x=0.d0; v2x=0.d0; v3x=0.d0; v1c=0.d0; v2c=0.d0; v3c=0.d0
            call tau_xc (arho, grho2(1),atau, ex, ec, v1x, v2x,v3x,v1c, v2c,v3c)
            
            v(k, 1) =  (v1x + v1c) * e2  ! Hartree to Rydberg 
@@ -283,10 +284,10 @@ SUBROUTINE v_xc_meta( rho, rho_core, rhog_core, etxc, vtxc, v, kedtaur )
         
      end if
   end do
-  do k = 1, 50
-     write(stdout,'(5(F10.4,2X))') rho%of_r(k,1), rho%kin_r(k,1), v(k,1), h(1,k,1), kedtaur(k,1)
-  enddo
-  STOP
+  !!!!do k = 1, 72
+  !!!!   write(stdout,'(6(F10.4,2X))') rho%of_r(k,1), grho(1,k,1), rho%kin_r(k,1), v(k,1), h(1,k,1), kedtaur(k,1)
+  !!!!enddo
+  !!!!STOP
   !
   !
   ALLOCATE( dh( dfftp%nnr ) )    

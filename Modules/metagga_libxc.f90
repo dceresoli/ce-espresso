@@ -80,7 +80,7 @@ subroutine tpsscxc(rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c)
   ! XC_MGGA_X_TPSS = 202
   call mgga_libxc(202, .true., rho, grho, tau, sx, v1x, v2x, v3x)
   ! XC_MGGA_C_TPSS = 231
-  !!call mgga_libxc(231 .true., rho, grho, tau, sc, v1c, v2c, v3c)
+  call mgga_libxc(231, .true., rho, grho, tau, sc, v1c, v2c, v3c)
 end subroutine tpsscxc
 
 

@@ -58,7 +58,7 @@ subroutine tpsscxc( rho, grho, tau, sx, sc, v1x, v2x, v3x, v1c, v2c, v3c )
   ! exchange
   call metax(rho,grho,tau,sx,v1x,v2x,v3x)
   ! correlation
-  !!call metac(rho,grho,tau,sc,v1c,v2c,v3c)
+  call metac(rho,grho,tau,sc,v1c,v2c,v3c)
   !
   !
   return  
@@ -122,9 +122,9 @@ subroutine metac(rho,grho2,tau,ec,v1c,v2c,v3c)
   USE kinds,            ONLY : DP
   implicit none
   !  INPUT
-  real(DP) :: rho, grho2, tau
+  real(DP),intent(in) :: rho, grho2, tau
   !  OUTPUT
-  real(DP) :: ec, v1c,v2c,v3c
+  real(DP),intent(out) :: ec, v1c,v2c,v3c
   !  LOCAL
   real(DP) :: z,z2,tauw,ec_rev,rs
   real(DP) :: d1rev, d2rev, d3rev
@@ -191,7 +191,8 @@ subroutine metac(rho,grho2,tau,ec,v1c,v2c,v3c)
   endif
   !
   tauw=0.1250_DP*grho2/rho
-  z=tauw/tau
+  !!!!CERESOLI, IT WAS: z=tauw/tau
+  z=4.d0*tanh(tauw/tau/4.d0)
   z2=z*z
   !  
   ec_rev=ec_pbe*(1+cab*z2)-cabone*z2*ec_sum
@@ -211,6 +212,7 @@ subroutine metac(rho,grho2,tau,ec,v1c,v2c,v3c)
   v3c=cf2*d3rev - cf3/tau
 
   ec=rho*ec_rev*(1.0_DP+dd*ec_rev*z2*z)  !-rho*ec_unif
+  !!!!CERESOLI: write(90,'(5(F10.4,2X))') rho, grho2, tauw, tau, z
   v1c=v1c !-vc_unif
   return
 end subroutine metac
