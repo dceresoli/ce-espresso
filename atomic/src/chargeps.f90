@@ -7,7 +7,7 @@
 !
 !
 !---------------------------------------------------------------
-subroutine chargeps(rho_i,phi_i,nwf_i,ll_i,jj_i,oc_i,iswf_i)
+subroutine chargeps(rho_i,tau_i,phi_i,nwf_i,ll_i,jj_i,oc_i,iswf_i)
   !---------------------------------------------------------------
   !
   !   calculate the (spherical) pseudo charge density 
@@ -28,7 +28,8 @@ subroutine chargeps(rho_i,phi_i,nwf_i,ll_i,jj_i,oc_i,iswf_i)
        jj_i(nwfsx), & ! input: their total angular momentum
        oc_i(nwfsx), & ! input: the occupation
        phi_i(ndmx,nwfsx), & ! input: the functions to add
-       rho_i(ndmx,2)   ! output: the (nspin) components of the charge
+       rho_i(ndmx,2), &! output: the (nspin) components of the charge
+       tau_i(ndmx,2)   ! output: the (nspin) components of the kinetic energy
 
   integer ::     &
        is,     &   ! counter on spin
@@ -102,6 +103,8 @@ subroutine chargeps(rho_i,phi_i,nwf_i,ll_i,jj_i,oc_i,iswf_i)
         if (rho_i(n,is)<-1.d-12) call errore('chargeps','negative rho',1)
      enddo
   enddo
+
+  call kin_e_density(ndmx, grid%mesh, nwf_i, ll_i, oc_i, phi_i, grid%r, grid%r2, grid%dx, tau_i)
 
   return
 end subroutine chargeps

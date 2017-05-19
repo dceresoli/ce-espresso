@@ -18,7 +18,7 @@ subroutine start_potps
   use io_global, only : stdout
   use ld1inc, only : grid, nspin, lsd, nlcc, latt, enne, rhos, rhoc, &
                      nwfts, llts, jjts, octs, iswts, phits, &
-                     vxt, vh, vpstot, vpsloc
+                     vxt, vh, vpstot, vpsloc, taus
   implicit none
 
   integer :: &
@@ -30,9 +30,9 @@ subroutine start_potps
   !
   !    compute an initial estimate of the potential
   !
-  call chargeps(rhos,phits,nwfts,llts,jjts,octs,iswts)
+  call chargeps(rhos,taus,phits,nwfts,llts,jjts,octs,iswts)
   call new_potential(ndmx,grid%mesh,grid,0.0_dp,vxt,lsd,nlcc, &
-       latt,enne,rhoc,rhos,vh,vnew,1)
+       latt,enne,rhoc,rhos,taus,vh,vnew,1)
 
   do is=1,nspin
      do n=1,grid%mesh

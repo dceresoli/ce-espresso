@@ -37,8 +37,8 @@ SUBROUTINE ld1_setup
       CALL errore('ld1_setup','meta-GGA not implemented for fully-relativistic case', 1)
   IF ( meta .and. lsd == 1 ) &
       CALL errore('ld1_setup','meta-GGA not implemented for LSDA', 2)
-  IF ( meta .and. iswitch > 1 ) &
-      CALL errore('ld1_setup','meta-GGA implemented only for all-electron case', 3)
+!!  IF ( meta .and. iswitch > 1 ) &
+!!      CALL errore('ld1_setup','meta-GGA implemented only for all-electron case', 3)
   hf  = get_iexch()==5
   IF (hf)     CALL errore('ld1_setup','HF not implemented yet',1)
   oep = get_iexch()==4

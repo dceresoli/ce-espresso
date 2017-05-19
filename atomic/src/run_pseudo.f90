@@ -18,7 +18,7 @@ SUBROUTINE run_pseudo
   USE radial_grids, ONLY : ndmx
   USE ld1_parameters, ONLY : nwfsx
   USE ld1inc, ONLY : enl, lpaw, nlcc, lsd, latt, pawsetup, &
-                     nstoaets, grid, nspin, iter, rhos, rhoc, &
+                     nstoaets, grid, nspin, iter, rhos, taus, rhoc, &
                      nwfts, enlts, llts, jjts, iswts, octs, phits, &
                      vxt, enne, vh, vpsloc, file_potscf, beta, tr2,  &
                      eps0, file_recon, deld, vpstot, nbeta, ddd, etots, &
@@ -78,13 +78,14 @@ SUBROUTINE run_pseudo
   !     iterate to self-consistency
   !
   DO iter=1,itmax
+print*, 'VPSTOT=', vpstot(1:4,1)
      CALL ascheqps_drv(vpstot, nspin, thresh, .false., nerr)
 
      IF (.not.lpaw) THEN
         !
-        CALL chargeps(rhos,phits,nwfts,llts,jjts,octs,iswts)
+        CALL chargeps(rhos,taus,phits,nwfts,llts,jjts,octs,iswts)
         CALL new_potential(ndmx,grid%mesh,grid,0.0_dp,vxt,lsd,&
-             nlcc,latt,enne,rhoc,rhos,vh,vnew,1)
+             nlcc,latt,enne,rhoc,rhos,taus,vh,vnew,1)
 
         DO is=1,nspin
            vpstot(:,is)=vpstot(:,is)-vpsloc(:)

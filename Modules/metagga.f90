@@ -192,7 +192,9 @@ subroutine metac(rho,grho2,tau,ec,v1c,v2c,v3c)
   !
   tauw=0.1250_DP*grho2/rho
   !!!!CERESOLI, IT WAS: z=tauw/tau
-  z=4.d0*tanh(tauw/tau/4.d0)
+!!z=tauw/tau; if (z > 1.d0) z = 1.d0
+z=2.d0*tanh(tauw/tau/2.d0)
+write(90,'(5(E10.4,2X))') rho, grho2, tauw, tau, z
   z2=z*z
   !  
   ec_rev=ec_pbe*(1+cab*z2)-cabone*z2*ec_sum

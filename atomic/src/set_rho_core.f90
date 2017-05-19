@@ -20,14 +20,15 @@ subroutine set_rho_core
   use mp_world,  only : world_comm
   use ld1inc, only : nlcc, grid, rhoc, aeccharge, psccharge, rcore, &
                      nwf, oc, rel, core_state, psi, file_core, new_core_ps,&
-                     lpaw, lnc2paw
+                     lpaw, lnc2paw, aectau, aevtau, isw
   implicit none
 
   real(DP) :: drho, const, br1, br2, &
        eps1, eps2, br12, xc(8), a, b, eps12, totrho
   real(DP), allocatable:: rhov(:)
+  real(DP), allocatable:: gradpsi(:,:), gradrho(:)
   real(DP), external :: int_0_inf_dr
-  integer :: i, ik, n, ns, ios
+  integer :: i, ik, n, ns, ios, is
 
   if (nlcc) then
      write(stdout,'(/,5x,'' Computing core charge for nlcc: '')')
@@ -66,7 +67,36 @@ subroutine set_rho_core
      psccharge(1:grid%mesh) = 0.0_DP
      goto 1100
   endif
-
+  !
+  !      calculates core tau density
+  !
+  allocate( gradpsi(grid%mesh,2), gradrho(grid%mesh) )
+  aevtau=0.0_DP
+  aectau=0.0_DP
+  do ns=1,nwf
+     if (oc(ns)>0.0_DP) then
+        is=isw(ns)
+        call grad_log(psi(1,1,ns), gradpsi(1,1), grid%rm1, grid%dx, grid%mesh, 4)
+        call grad_log(psi(1,2,ns), gradpsi(1,2), grid%rm1, grid%dx, grid%mesh, 4)
+        do n=1,grid%mesh
+           if (rel==2) then
+              if (core_state(ns)) then
+                 aectau(n)=aectau(n) &
+                              +oc(ns)*( gradpsi(n,1)**2 + gradpsi(n,2)**2 )
+              else
+                 aevtau(n,is)=aevtau(n,is)+oc(ns)*(gradpsi(n,1)**2 &
+                                                       + gradpsi(n,2)**2)
+              endif
+           else
+              if (core_state(ns)) then
+                 aectau(n) = aectau(n) + oc(ns)*gradpsi(n,1)**2
+              else
+                 aevtau(n,is) = aevtau(n,is) + oc(ns)*gradpsi(n,1)**2
+              endif
+           endif
+        enddo
+     endif
+  enddo
 !  write(stdout,'("Integrated core charge",f15.10)') totrho
   aeccharge(1:grid%mesh) = rhoc(1:grid%mesh)
   !
@@ -176,6 +206,18 @@ subroutine set_rho_core
         endif
         close(26)
      endif
+
+     if (ionode) open(unit=26,file=trim(file_core)//'_tau', status='unknown', iostat=ios, err=301 )
+301  call mp_bcast(ios, ionode_id, world_comm)
+     call errore('set_rho_core','opening file '//file_core//'_tau',abs(ios))
+     if (ionode) then
+       call grad_log(rhoc(:)+rhov(:), gradrho(:), grid%rm1, grid%dx, grid%mesh, 4)
+       do n=1,grid%mesh
+          write(26,'(5f20.10)') grid%r(n), max(rhoc(n)+rhov(n),1d-10), gradrho(n)**2.d0, aectau(n), aevtau(n,1)+aevtau(n,2)
+       enddo
+       close(26)
+     endif
+
   endif
   totrho = int_0_inf_dr(rhoc,grid,grid%mesh,2)
   write(stdout,'(6x,''Integrated core pseudo-charge : '',f6.2)')  totrho

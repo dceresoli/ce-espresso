@@ -13,7 +13,7 @@ subroutine c6_dft (mesh, zed, grid)
    use kinds,      only : DP
    use constants,  only : e2, pi, fpi, BOHR_RADIUS_ANGS
    use ld1inc,     only : lsd, nwf, oc, nn, ll, isw, psi, enl, vpot,vxt,vh, &
-                          enne, latt, rho
+                          enne, latt, rho, tau
    use radial_grids, only: radial_grid_type, ndmx
    !
    implicit none
@@ -88,7 +88,7 @@ subroutine c6_dft (mesh, zed, grid)
    end if
 
    rhoc1=0.d0
-   call new_potential(ndmx,mesh,grid,zed,vxt,lsd,.false.,latt,enne,rhoc1,rho,vh,vnew,0)
+   call new_potential(ndmx,mesh,grid,zed,vxt,lsd,.false.,latt,enne,rhoc1,rho,tau,vh,vnew,0)
    error = 0.d0
    do i=1,mesh
       error = error + abs( vpot(i,1)-vnew(i,1) ) * grid%r2(i) * grid%dx

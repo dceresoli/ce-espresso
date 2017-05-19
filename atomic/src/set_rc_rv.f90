@@ -17,9 +17,9 @@ subroutine set_rc_rv()
   use ld1_parameters, only : nwfx
   
   use ld1inc, only : grid, aeccharge, aevcharge, nwf, oc, isw, rel, psi, &
-                     core_state
+                     core_state, aectau, aevtau
   implicit none
-
+  real(dp), allocatable :: gradpsi(:,:)
   integer :: n, ns, is
   !
   !      calculates core charge density
@@ -47,6 +47,36 @@ subroutine set_rc_rv()
            endif
         endif
      enddo
+  enddo
+  !
+  !      the same for tau
+  !
+  allocate( gradpsi(grid%mesh,2) )
+  aevtau=0.0_DP
+  aectau=0.0_DP
+  do ns=1,nwf
+     if (oc(ns)>0.0_DP) then
+        is=isw(ns)
+        call grad_log(psi(1,1,ns), gradpsi(1,1), grid%rm1, grid%dx, grid%mesh, 4)
+        call grad_log(psi(1,2,ns), gradpsi(1,2), grid%rm1, grid%dx, grid%mesh, 4)
+        do n=1,grid%mesh
+           if (rel==2) then
+              if (core_state(ns)) then
+                 aectau(n)=aectau(n) &
+                              +oc(ns)*( gradpsi(n,1)**2 + gradpsi(n,2)**2 )
+              else
+                 aevtau(n,is)=aevtau(n,is)+oc(ns)*(gradpsi(n,1)**2 &
+                                                       + gradpsi(n,2)**2)
+              endif
+           else
+              if (core_state(ns)) then
+                 aectau(n) = aectau(n) + oc(ns)*gradpsi(n,1)**2
+              else
+                 aevtau(n,is) = aevtau(n,is) + oc(ns)*gradpsi(n,1)**2
+              endif
+           endif
+        enddo
+     endif
   enddo
   return
 end subroutine set_rc_rv

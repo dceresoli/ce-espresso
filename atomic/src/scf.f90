@@ -95,7 +95,7 @@ SUBROUTINE scf(ic)
      ! calculate new potential
      !
      CALL new_potential ( ndmx, grid%mesh, grid, zed, vxt, &
-          lsd, .false., latt, enne, rhoc1, rho, vh, vnew, 1 )
+          lsd, .false., latt, enne, rhoc1, rho, tau, vh, vnew, 1 )
      !
      ! calculate SIC correction potential (if present)
      !

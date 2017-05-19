@@ -17,7 +17,7 @@ subroutine starting_potential &
   ! electron cannot be smaller than 1 (far from the core)
   !
   use kinds, only : DP
-  use ld1inc, only : frozen_core, noscf
+  use ld1inc, only : frozen_core, noscf, vtau
   implicit none
   integer :: nwf, nn(nwf), ll(nwf), ndm, mesh, n, i, nspin
   real(DP) :: r(ndm), vpot(ndm,2), v0(ndm), vxt(ndm), enl(nwf), oc(nwf), &
@@ -59,6 +59,7 @@ subroutine starting_potential &
         vpot(i,2)=vpot(i,1)
      enddo
   endif
+  vtau = 0.d0
   !
   return
 end subroutine starting_potential

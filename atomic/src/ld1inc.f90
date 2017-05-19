@@ -261,7 +261,11 @@ MODULE ld1inc
        enzero(2)
   real(DP) ::  &
        tau(ndmx,2),   & ! kinetic energy density for metaGGA
+       taus(ndmx,2),  & ! pseudo kinetic energy density for metaGGA
        vtau(ndmx)       ! potential for metaGGA
+  real(DP) ::  &
+       aectau(ndmx),    & ! true, not smoothened, AE core tau
+       aevtau(ndmx,2)     ! the all-electron valence tau
   real(DP), ALLOCATABLE ::  &
        vsic(:,:), vsicnew(:), vhn1(:), egc(:) ! potentials for SIC
   !
