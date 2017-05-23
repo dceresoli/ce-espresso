@@ -27,7 +27,7 @@ MODULE cp_restart
   USE io_files,  ONLY : xmlpun, qexml_version, qexml_version_init
   USE xml_io_base, ONLY  : write_wfc
 #endif
-  USE xml_io_base,     ONLY  : read_wfc, write_rho_xml,read_print_counter, create_directory
+  USE xml_io_base,     ONLY  : read_wfc, write_rho, read_print_counter, create_directory
   !
   USE kinds,     ONLY : DP
   USE io_global, ONLY : ionode, ionode_id, stdout
@@ -263,7 +263,7 @@ MODULE cp_restart
       !
 #if !defined (__OLDXML)
       !
-      CALL errore('cp_restart','called in wrong case',1)
+      CALL errore('cp_writefile','called in wrong case',1)
       !
 #else
       !
@@ -309,7 +309,7 @@ MODULE cp_restart
          WRITE( stdout, '(/,3X,"writing restart file: ",A)' ) TRIM( dirname )
          !
          CALL qexml_init( iunpun )
-         CALL qexml_openfile( TRIM( dirname ) // '/' // TRIM( xmlpun ), &
+         CALL qexml_openfile( TRIM( dirname ) // TRIM( xmlpun ), &
                              & 'write', BINARY = .FALSE., IERR = ierr  )
          !
       END IF
@@ -418,52 +418,7 @@ MODULE cp_restart
 ! ... CHARGE-DENSITY
 !-------------------------------------------------------------------------------
       !
-      IF (write_charge_density) then
-         !
-         filename = 'charge-density'
-         !
-         IF ( ionode ) THEN
-              CALL iotk_link( iunpun, "CHARGE-DENSITY", filename, &
-              CREATE = .FALSE., BINARY = .TRUE. )
-         END IF
-         !
-         filename = TRIM( dirname ) // '/' // TRIM( filename )
-         !
-         IF ( nspin == 1 ) THEN
-            !
-            CALL write_rho_xml( filename, rho(:,1), &
-                                dfftp%nr1, dfftp%nr2, dfftp%nr3, dfftp%nr1x, dfftp%nr2x, &
-                                dfftp%ipp, dfftp%npp, ionode, intra_bgrp_comm, inter_bgrp_comm )
-            !
-         ELSE IF ( nspin == 2 ) THEN
-            !
-            ALLOCATE( rhoaux( SIZE( rho, 1 ) ) )
-            !
-            rhoaux = rho(:,1) + rho(:,2) 
-            !
-            CALL write_rho_xml( filename, rhoaux, &
-                                dfftp%nr1, dfftp%nr2, dfftp%nr3, dfftp%nr1x, dfftp%nr2x, &
-                                dfftp%ipp, dfftp%npp, ionode, intra_bgrp_comm, inter_bgrp_comm )
-            !
-            filename = 'spin-polarization'
-            !
-            IF ( ionode ) &
-                 CALL iotk_link( iunpun, "SPIN-POLARIZATION", filename, &
-                 CREATE = .FALSE., BINARY = .TRUE. )
-            !
-            filename = TRIM( dirname ) // '/' // TRIM( filename )
-            !
-            rhoaux = rho(:,1) - rho(:,2) 
-            !
-            CALL write_rho_xml( filename, rhoaux, &
-                                dfftp%nr1, dfftp%nr2, dfftp%nr3, dfftp%nr1x, dfftp%nr2x, &
-                                dfftp%ipp, dfftp%npp, ionode, intra_bgrp_comm, inter_bgrp_comm )
-            !
-            DEALLOCATE( rhoaux )
-            !
-         END IF
-         !
-      END IF ! write_charge_density
+      IF (write_charge_density) CALL write_rho ( dirname, rho, nspin )
       !
 !-------------------------------------------------------------------------------
 ! ... LDA+U OCCUPATIONS (compatibility with PWscf)
@@ -472,9 +427,7 @@ MODULE cp_restart
       IF ( lda_plus_u ) THEN
          !
          IF ( ionode ) THEN
-            i = LEN_TRIM( dirname )
-            ! ugly hack to remove .save from dirname
-            filename = dirname (1:i-4) // 'occup'
+            filename = dirname // 'occup'
             OPEN (UNIT=iunout,FILE=filename,FORM ='formatted',STATUS='unknown')
             WRITE( iunout, * , iostat = ierr) ns
          END IF
@@ -1048,7 +1001,6 @@ MODULE cp_restart
                    'no free units to read wavefunctions', ierr )
       !
 #if !defined (__OLDXML)
-      !     
       CALL errore('cp_readfile','called in wrong case',1)
 #else
       kunit = 1
@@ -1061,15 +1013,11 @@ MODULE cp_restart
       !
       IF ( ionode ) THEN
          !
-         !filename = TRIM( dirname ) // '/' // TRIM( xmlpun )
-         !
          WRITE( stdout, '(/,3X,"reading restart file: ",A)' ) TRIM( dirname )
-         !
-         !CALL iotk_open_read( iunpun, FILE = TRIM( filename ), IERR = ierr )
          !
          CALL qexml_init( iunpun )
          !
-         CALL qexml_openfile( TRIM( dirname ) // '/' // TRIM( xmlpun ), &
+         CALL qexml_openfile( TRIM( dirname ) // TRIM( xmlpun ), &
                               'read', BINARY = .FALSE., IERR = ierr  )
          !
       END IF
@@ -1129,7 +1077,7 @@ MODULE cp_restart
       !
       IF ( ionode ) THEN
          !
-         filename = TRIM( dirname ) // '/' // TRIM( xmlpun )
+         filename = TRIM( dirname ) // TRIM( xmlpun )
          !
          CALL iotk_open_read( iunpun, FILE = TRIM( filename ), IERR = ierr )
          !
@@ -1822,7 +1770,7 @@ MODULE cp_restart
       REAL(DP)           :: scalef
       !
 #if !defined (__OLDXML)
-      CALL errore('cp_read_wfc','XSD under development',1)
+      CALL errore('cp_read_wfc','called in the wrong case',1)
 #else
       kunit = 1
       !
@@ -1996,7 +1944,7 @@ MODULE cp_restart
       !
       dirname = qexml_restart_dirname( tmp_dir, prefix, ndr ) 
       !
-      filename = TRIM( dirname ) // '/' // TRIM( xmlpun )
+      filename = TRIM( dirname ) // TRIM( xmlpun )
       !
       IF ( ionode ) &
          CALL iotk_open_read( iunpun, FILE = TRIM( filename ), &

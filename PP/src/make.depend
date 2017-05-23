@@ -104,7 +104,6 @@ bgw2pw.o : ../../Modules/qexml.o
 bgw2pw.o : ../../Modules/recvec.o
 bgw2pw.o : ../../Modules/wavefunctions.o
 bgw2pw.o : ../../Modules/xml_io_base.o
-bgw2pw.o : ../../PW/src/io_rho_xml.o
 bgw2pw.o : ../../PW/src/pwcom.o
 bgw2pw.o : ../../PW/src/scf_mod.o
 bgw2pw.o : ../../PW/src/symm_base.o
@@ -184,6 +183,7 @@ do_initial_state.o : ../../Modules/kind.o
 do_initial_state.o : ../../Modules/parameters.o
 do_initial_state.o : ../../Modules/recvec.o
 do_initial_state.o : ../../Modules/uspp.o
+do_initial_state.o : ../../PW/src/extfield.o
 do_initial_state.o : ../../PW/src/ldaU.o
 do_initial_state.o : ../../PW/src/newd.o
 do_initial_state.o : ../../PW/src/pwcom.o
@@ -537,6 +537,7 @@ punch_plot.o : ../../Modules/kind.o
 punch_plot.o : ../../Modules/noncol.o
 punch_plot.o : ../../Modules/recvec.o
 punch_plot.o : ../../Modules/run_info.o
+punch_plot.o : ../../PW/src/extfield.o
 punch_plot.o : ../../PW/src/pwcom.o
 punch_plot.o : ../../PW/src/scf_mod.o
 punch_plot.o : paw_postproc.o
@@ -621,6 +622,7 @@ pw2wannier90.o : ../../PW/src/pwcom.o
 pw2wannier90.o : ../../PW/src/scf_mod.o
 pw2wannier90.o : ../../PW/src/symm_base.o
 pw_export.o : ../../Modules/becmod.o
+pw_export.o : ../../Modules/cell_base.o
 pw_export.o : ../../Modules/control_flags.o
 pw_export.o : ../../Modules/environment.o
 pw_export.o : ../../Modules/fft_base.o

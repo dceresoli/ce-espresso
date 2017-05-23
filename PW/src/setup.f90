@@ -427,8 +427,9 @@ SUBROUTINE setup()
   ! ... Compute the cut-off of the G vectors
   !
   doublegrid = ( dual > 4.D0 )
-  IF ( doublegrid .AND. (.NOT.okvan .AND. .not.okpaw) ) &
-     CALL infomsg ( 'setup', 'no reason to have ecutrho>4*ecutwfc' )
+  IF ( doublegrid .AND. ( .NOT.okvan .AND. .NOT.okpaw .AND. &
+                          .NOT. ANY (upf(1:ntyp)%nlcc)      ) ) &
+       CALL infomsg ( 'setup', 'no reason to have ecutrho>4*ecutwfc' )
   gcutm = dual * ecutwfc / tpiba2
   gcutw = ecutwfc / tpiba2
   !
@@ -588,11 +589,12 @@ SUBROUTINE setup()
 #endif 
      CALL errore( 'setup ', 'problem reading ef from file ' // &
              & TRIM( tmp_dir ) // TRIM( prefix ) // '.save', ierr )
-
      !
   ELSE IF ( ltetra ) THEN
      !
      ! ... Calculate quantities used in tetrahedra method
+     !
+     IF (nks_start /= 0) CALL errore( 'setup ', 'tetrahedra need automatic k-point grid',1)
      !
      IF (tetra_type == 0) then
         CALL tetra_init( nsym, s, time_reversal, t_rev, at, bg, npk, k1,k2,k3, &

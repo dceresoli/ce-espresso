@@ -26,6 +26,7 @@ add_efield.o : ../../Modules/kind.o
 add_efield.o : ../../Modules/mp.o
 add_efield.o : ../../Modules/mp_bands.o
 add_efield.o : ../../Modules/mp_images.o
+add_efield.o : extfield.o
 add_efield.o : pwcom.o
 add_monofield.o : ../../Modules/cell_base.o
 add_monofield.o : ../../Modules/constants.o
@@ -37,6 +38,7 @@ add_monofield.o : ../../Modules/kind.o
 add_monofield.o : ../../Modules/mp.o
 add_monofield.o : ../../Modules/mp_bands.o
 add_monofield.o : ../../Modules/mp_images.o
+add_monofield.o : extfield.o
 add_monofield.o : pwcom.o
 add_paw_to_deeq.o : ../../Modules/ions_base.o
 add_paw_to_deeq.o : ../../Modules/kind.o
@@ -271,6 +273,7 @@ clean_pw.o : ../../Modules/wavefunctions.o
 clean_pw.o : atomic_wfc_mod.o
 clean_pw.o : bp_mod.o
 clean_pw.o : dynamics_module.o
+clean_pw.o : extfield.o
 clean_pw.o : exx.o
 clean_pw.o : ldaU.o
 clean_pw.o : paw_init.o
@@ -318,6 +321,7 @@ compute_dip.o : ../../Modules/ions_base.o
 compute_dip.o : ../../Modules/kind.o
 compute_dip.o : ../../Modules/mp.o
 compute_dip.o : ../../Modules/mp_bands.o
+compute_dip.o : extfield.o
 compute_dip.o : pwcom.o
 compute_qdipol.o : ../../Modules/atom.o
 compute_qdipol.o : ../../Modules/constants.o
@@ -392,6 +396,7 @@ dynamics_module.o : ../../Modules/io_global.o
 dynamics_module.o : ../../Modules/ions_base.o
 dynamics_module.o : ../../Modules/kind.o
 dynamics_module.o : ../../Modules/random_numbers.o
+dynamics_module.o : extfield.o
 dynamics_module.o : pwcom.o
 dynamics_module.o : symm_base.o
 efermig.o : ../../Modules/constants.o
@@ -429,6 +434,7 @@ electrons.o : atomic_wfc_mod.o
 electrons.o : bp_mod.o
 electrons.o : buffers.o
 electrons.o : esm.o
+electrons.o : extfield.o
 electrons.o : exx.o
 electrons.o : io_rho_xml.o
 electrons.o : ldaU.o
@@ -468,6 +474,7 @@ ewald_dipole.o : ../../Modules/mp.o
 ewald_dipole.o : ../../Modules/mp_bands.o
 ewald_dipole.o : ../../Modules/recvec.o
 ewald_dipole.o : pwcom.o
+extfield.o : ../../Modules/kind.o
 extpot.o : ../../FFTXlib/scatter_mod.o
 extpot.o : ../../Modules/fft_base.o
 extpot.o : ../../Modules/io_global.o
@@ -614,6 +621,7 @@ forces.o : ../../Modules/tsvdw.o
 forces.o : ../../Modules/uspp.o
 forces.o : bp_mod.o
 forces.o : esm.o
+forces.o : extfield.o
 forces.o : ldaU.o
 forces.o : martyna_tuckerman.o
 forces.o : pwcom.o
@@ -766,7 +774,6 @@ h_psi.o : ../../Modules/mp_bands.o
 h_psi.o : ../../Modules/noncol.o
 h_psi.o : ../../Modules/recvec.o
 h_psi.o : ../../Modules/uspp.o
-h_psi.o : ../../Modules/wavefunctions.o
 h_psi.o : bp_mod.o
 h_psi.o : exx.o
 h_psi.o : ldaU.o
@@ -936,11 +943,13 @@ input.o : ../../Modules/run_info.o
 input.o : ../../Modules/tsvdw.o
 input.o : ../../Modules/wannier_new.o
 input.o : ../../Modules/wrappers.o
+input.o : ../../Modules/wyckoff.o
 input.o : a2fmod.o
 input.o : atomic_wfc_mod.o
 input.o : bp_mod.o
 input.o : dynamics_module.o
 input.o : esm.o
+input.o : extfield.o
 input.o : extpot.o
 input.o : exx.o
 input.o : ldaU.o
@@ -951,23 +960,24 @@ input.o : start_k.o
 input.o : symm_base.o
 input.o : tetra.o
 input.o : update_pot.o
-input.o : wyckoff.o
 input.o : xdm_dispersion.o
 interpolate.o : ../../FFTXlib/fft_interfaces.o
 interpolate.o : ../../Modules/control_flags.o
 interpolate.o : ../../Modules/fft_base.o
 interpolate.o : ../../Modules/kind.o
 interpolate.o : ../../Modules/recvec.o
-io_rho_xml.o : ../../Modules/fft_base.o
+io_rho_xml.o : ../../Modules/cell_base.o
+io_rho_xml.o : ../../Modules/control_flags.o
 io_rho_xml.o : ../../Modules/funct.o
+io_rho_xml.o : ../../Modules/io_base.o
 io_rho_xml.o : ../../Modules/io_files.o
 io_rho_xml.o : ../../Modules/io_global.o
 io_rho_xml.o : ../../Modules/kind.o
 io_rho_xml.o : ../../Modules/mp.o
-io_rho_xml.o : ../../Modules/mp_bands.o
 io_rho_xml.o : ../../Modules/mp_images.o
 io_rho_xml.o : ../../Modules/noncol.o
 io_rho_xml.o : ../../Modules/paw_variables.o
+io_rho_xml.o : ../../Modules/recvec.o
 io_rho_xml.o : ../../Modules/xml_io_base.o
 io_rho_xml.o : ldaU.o
 io_rho_xml.o : pwcom.o
@@ -1345,7 +1355,9 @@ potinit.o : ../../Modules/cell_base.o
 potinit.o : ../../Modules/constants.o
 potinit.o : ../../Modules/control_flags.o
 potinit.o : ../../Modules/fft_base.o
+potinit.o : ../../Modules/fft_rho.o
 potinit.o : ../../Modules/funct.o
+potinit.o : ../../Modules/io_base.o
 potinit.o : ../../Modules/io_files.o
 potinit.o : ../../Modules/io_global.o
 potinit.o : ../../Modules/ions_base.o
@@ -1486,6 +1498,7 @@ pw_restart.o : acfdt_in_pw.o
 pw_restart.o : atomic_wfc_mod.o
 pw_restart.o : buffers.o
 pw_restart.o : esm.o
+pw_restart.o : extfield.o
 pw_restart.o : exx.o
 pw_restart.o : io_rho_xml.o
 pw_restart.o : ldaU.o
@@ -1536,6 +1549,7 @@ pw_restart_new.o : atomic_wfc_mod.o
 pw_restart_new.o : bp_mod.o
 pw_restart_new.o : buffers.o
 pw_restart_new.o : esm.o
+pw_restart_new.o : extfield.o
 pw_restart_new.o : exx.o
 pw_restart_new.o : io_rho_xml.o
 pw_restart_new.o : ldaU.o
@@ -1547,8 +1561,6 @@ pw_restart_new.o : start_k.o
 pw_restart_new.o : symm_base.o
 pw_restart_new.o : tetra.o
 pw_restart_new.o : xdm_dispersion.o
-pwcom.o : ../../Modules/cell_base.o
-pwcom.o : ../../Modules/constants.o
 pwcom.o : ../../Modules/kind.o
 pwcom.o : ../../Modules/parameters.o
 pwscf.o : ../../Modules/command_line_options.o
@@ -1603,6 +1615,7 @@ read_file.o : ../../Modules/uspp.o
 read_file.o : ../../Modules/wavefunctions.o
 read_file.o : buffers.o
 read_file.o : esm.o
+read_file.o : extfield.o
 read_file.o : io_rho_xml.o
 read_file.o : ldaU.o
 read_file.o : newd.o
@@ -1619,6 +1632,7 @@ read_file_new.o : ../../Modules/cell_base.o
 read_file_new.o : ../../Modules/constants.o
 read_file_new.o : ../../Modules/control_flags.o
 read_file_new.o : ../../Modules/fft_base.o
+read_file_new.o : ../../Modules/fft_rho.o
 read_file_new.o : ../../Modules/funct.o
 read_file_new.o : ../../Modules/gvecw.o
 read_file_new.o : ../../Modules/hdf5_qe.o
@@ -1639,6 +1653,7 @@ read_file_new.o : ../../Modules/uspp.o
 read_file_new.o : ../../Modules/wavefunctions.o
 read_file_new.o : buffers.o
 read_file_new.o : esm.o
+read_file_new.o : extfield.o
 read_file_new.o : io_rho_xml.o
 read_file_new.o : ldaU.o
 read_file_new.o : newd.o
@@ -1683,7 +1698,7 @@ remove_atomic_rho.o : ../../Modules/fft_base.o
 remove_atomic_rho.o : ../../Modules/io_files.o
 remove_atomic_rho.o : ../../Modules/io_global.o
 remove_atomic_rho.o : ../../Modules/kind.o
-remove_atomic_rho.o : io_rho_xml.o
+remove_atomic_rho.o : ../../Modules/xml_io_base.o
 remove_atomic_rho.o : pwcom.o
 remove_atomic_rho.o : scf_mod.o
 report_mag.o : ../../Modules/constants.o
@@ -1793,6 +1808,7 @@ scf_mod.o : ../../Modules/recvec.o
 scf_mod.o : ../../Modules/uspp.o
 scf_mod.o : ../../Modules/wavefunctions.o
 scf_mod.o : buffers.o
+scf_mod.o : extfield.o
 scf_mod.o : ldaU.o
 scf_mod.o : paw_onecenter.o
 scf_mod.o : pwcom.o
@@ -1828,6 +1844,7 @@ setlocal.o : ../../Modules/mp_bands.o
 setlocal.o : ../../Modules/qmmm.o
 setlocal.o : ../../Modules/recvec.o
 setlocal.o : esm.o
+setlocal.o : extfield.o
 setlocal.o : extpot.o
 setlocal.o : martyna_tuckerman.o
 setlocal.o : pwcom.o
@@ -1857,6 +1874,7 @@ setup.o : ../../Modules/recvec.o
 setup.o : ../../Modules/uspp.o
 setup.o : atomic_wfc_mod.o
 setup.o : bp_mod.o
+setup.o : extfield.o
 setup.o : exx.o
 setup.o : ldaU.o
 setup.o : pw_restart.o
@@ -2107,8 +2125,9 @@ update_pot.o : ../../Modules/paw_variables.o
 update_pot.o : ../../Modules/recvec.o
 update_pot.o : ../../Modules/uspp.o
 update_pot.o : ../../Modules/wavefunctions.o
+update_pot.o : ../../Modules/xml_io_base.o
 update_pot.o : buffers.o
-update_pot.o : io_rho_xml.o
+update_pot.o : extfield.o
 update_pot.o : ldaU.o
 update_pot.o : paw_onecenter.o
 update_pot.o : pwcom.o
@@ -2282,8 +2301,6 @@ write_ns.o : ldaU.o
 write_ns.o : pwcom.o
 write_ns.o : scf_mod.o
 wsweight.o : ../../Modules/kind.o
-wyckoff.o : ../../Modules/kind.o
-wyckoff.o : ../../Modules/space_group.o
 xdm_dispersion.o : ../../Modules/atom.o
 xdm_dispersion.o : ../../Modules/cell_base.o
 xdm_dispersion.o : ../../Modules/constants.o
