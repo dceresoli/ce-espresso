@@ -11,7 +11,7 @@ subroutine qvan2 (ngy, ih, jh, np, qmod, qg, ylmk0)
   !-----------------------------------------------------------------------
   !
   !    This routine computes the fourier transform of the Q functions
-  !    The interpolation table for the radial fourier trasform is stored 
+  !    The interpolation table for the radial fourier transform is stored 
   !    in qrad.
   !
   !    The formula implemented here is
@@ -89,6 +89,7 @@ subroutine qvan2 (ngy, ih, jh, np, qmod, qg, ylmk0)
      if ( lp < 1 .or. lp > 49 ) call errore ('qvan2', ' lp wrong ', max(lp,1))
      !
      !     find angular momentum l corresponding to combined index lp
+     !     (l is actually l+1 because this is the way qrad is stored, check init_us_1)
      !
      if (lp == 1) then
         l = 1
@@ -128,7 +129,7 @@ subroutine qvan2 (ngy, ih, jh, np, qmod, qg, ylmk0)
         !
         ! calculate quantites depending on the module of G only when needed
         !
-#if ! defined __OPENMP
+#if ! defined _OPENMP
         IF ( ABS( qmod(ig) - qm1 ) > 1.0D-6 ) THEN
 #endif
            !
@@ -147,7 +148,7 @@ subroutine qvan2 (ngy, ih, jh, np, qmod, qg, ylmk0)
                   qrad (i1, ijv, l, np) * pwx * vx - &
                   qrad (i2, ijv, l, np) * pwx * ux + &
                   qrad (i3, ijv, l, np) * px * uvx
-#if ! defined __OPENMP
+#if ! defined _OPENMP
            qm1 = qmod(ig)
         END IF
 #endif

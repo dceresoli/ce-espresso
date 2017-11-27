@@ -22,7 +22,8 @@ SUBROUTINE phq_readin()
   USE mp,            ONLY : mp_bcast
   USE mp_world,      ONLY : world_comm
   USE ions_base,     ONLY : amass, atm
-  USE input_parameters, ONLY : max_seconds, nk1, nk2, nk3, k1, k2, k3
+  USE check_stop,    ONLY : max_seconds
+  USE input_parameters, ONLY : nk1, nk2, nk3, k1, k2, k3
   USE start_k,       ONLY : reset_grid
   USE klist,         ONLY : xk, nks, nkstot, lgauss, two_fermi_energies, ltetra
   USE control_flags, ONLY : gamma_only, tqr, restart, lkpoint_dir, io_level, &
@@ -589,7 +590,11 @@ SUBROUTINE phq_readin()
         IF (.NOT.ext_recover.AND..NOT.ext_restart) tmp_dir_phq=tmp_dir_ph
      ENDIF
      !
+#if defined (__OLDXML)
      filename=TRIM(tmp_dir_phq)//TRIM(prefix)//'.save/data-file.xml'
+#else
+     filename=TRIM(tmp_dir_phq)//TRIM(prefix)//'.save/data-file-schema.xml'
+#endif
      IF (ionode) inquire (file =TRIM(filename), exist = exst)
      !
      CALL mp_bcast( exst, ionode_id, intra_image_comm )

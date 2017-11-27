@@ -34,7 +34,7 @@ SUBROUTINE potinit()
   USE fft_interfaces,       ONLY : fwfft
   USE gvect,                ONLY : ngm, gstart, nl, g, gg, ig_l2g
   USE gvecs,                ONLY : doublegrid
-  USE control_flags,        ONLY : lscf
+  USE control_flags,        ONLY : lscf, gamma_only
   USE scf,                  ONLY : rho, rho_core, rhog_core, &
                                    vltot, v, vrs, kedtau
   USE funct,                ONLY : dft_is_meta
@@ -46,7 +46,7 @@ SUBROUTINE potinit()
   USE io_files,             ONLY : tmp_dir, prefix, input_drho
   USE spin_orb,             ONLY : domag, lforcet
   USE mp,                   ONLY : mp_sum
-  USE mp_bands ,            ONLY : intra_bgrp_comm
+  USE mp_bands ,            ONLY : intra_bgrp_comm, root_bgrp
   USE io_global,            ONLY : ionode, ionode_id
   USE io_rho_xml,           ONLY : read_scf
   USE xml_io_base,          ONLY : check_file_exst
@@ -87,7 +87,7 @@ SUBROUTINE potinit()
      ! ... this also reads rho%ns if lda+U and rho%bec if PAW
      !
      IF ( .NOT.lforcet ) THEN
-        CALL read_scf ( rho, nspin )
+        CALL read_scf ( rho, nspin, gamma_only )
 #if !defined (__OLDXML)
         CALL rho_g2r ( rho%of_g, rho%of_r )
 #endif
@@ -99,7 +99,8 @@ SUBROUTINE potinit()
 #if defined (__OLDXML)
         CALL read_rho ( dirname, rho%of_r, 2 )
 #else
-        CALL read_rhog ( dirname, ig_l2g, nspin, rho%of_g )
+        CALL read_rhog ( dirname, root_bgrp, intra_bgrp_comm, &
+             ig_l2g, nspin, rho%of_g, gamma_only )
         CALL rho_g2r ( rho%of_g, rho%of_r )
 #endif
         CALL nc_magnetization_from_lsda ( dfftp%nnr, nspin, rho%of_r )
@@ -154,7 +155,8 @@ SUBROUTINE potinit()
 #if defined (__OLDXML)
         CALL read_rho ( dirname, v%of_r, 1, input_drho )
 #else
-        CALL read_rhog ( dirname, ig_l2g, nspin, v%of_g )
+        CALL read_rhog ( dirname, root_bgrp, intra_bgrp_comm, &
+             ig_l2g, nspin, v%of_g, gamma_only )
         CALL rho_g2r ( v%of_g, v%of_r )
 #endif
         !
@@ -292,11 +294,13 @@ SUBROUTINE nc_magnetization_from_lsda ( nnr, nspin, rho )
        angle1(1)/PI*180.d0, angle2(1)/PI*180.d0 
   WRITE(stdout,*) '-----------'
   !
+#ifdef __OLDXML
   ! On input, rho(1)=rho_up, rho(2)=rho_down
   ! Set rho(1)=rho_tot, rho(3)=rho_up-rho_down=magnetization
   ! 
   rho(:,3) = rho(:,1)-rho(:,2)
   rho(:,1) = rho(:,1)+rho(:,2)
+#endif
   !
   ! now set rho(2)=magn*sin(theta)*cos(phi)   x
   !         rho(3)=magn*sin(theta)*sin(phi)   y

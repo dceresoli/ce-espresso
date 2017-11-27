@@ -8,7 +8,7 @@
 #if defined(__OLDXML)
 !----------------------------------------------------------------------------
 ! TB
-! included allocation of the force field of the monopole, search for 'TB'
+! included allocation of the force field of the gate, search for 'TB'
 !----------------------------------------------------------------------------
 !
 !----------------------------------------------------------------------------
@@ -35,6 +35,9 @@ SUBROUTINE read_file()
   USE klist,                ONLY : init_igk
   USE gvect,                ONLY : ngm, g
   USE gvecw,                ONLY : gcutw
+#if defined (__HDF5)
+  USE hdf5_qe
+#endif
   !
   IMPLICIT NONE 
   INTEGER :: ierr
@@ -48,6 +51,9 @@ SUBROUTINE read_file()
   !
   IF ( ionode ) WRITE( stdout, '(/,5x,A,/,5x,A)') &
      'Reading data from directory:', TRIM( tmp_dir ) // TRIM( prefix ) // '.save'
+#if defined(__HDF5)
+  CALL initialize_hdf5()
+#endif
   !
   CALL read_xml_file ( )
   !
@@ -117,7 +123,7 @@ SUBROUTINE read_xml_file_internal(withbs)
   USE lsda_mod,             ONLY : lsda, nspin, current_spin, isk
   USE wvfct,                ONLY : nbnd, nbndx, et, wg
   USE symm_base,            ONLY : irt, d1, d2, d3, checkallsym, nsym
-  USE extfield,             ONLY : forcefield, tefield, monopole, forcemono
+  USE extfield,             ONLY : forcefield, tefield, gate, forcegate
   USE cellmd,               ONLY : cell_factor, lmovecell
   USE fft_base,             ONLY : dfftp
   USE fft_interfaces,       ONLY : fwfft
@@ -125,6 +131,7 @@ SUBROUTINE read_xml_file_internal(withbs)
   USE recvec_subs,          ONLY : ggen
   USE gvect,                ONLY : gg, ngm, g, gcutm, &
                                    eigts1, eigts2, eigts3, nl, gstart
+  USE Coul_cut_2D,          ONLY : do_cutoff_2D, cutoff_fact
   USE fft_base,             ONLY : dfftp, dffts
   USE gvecs,                ONLY : ngms, nls, gcutms 
   USE spin_orb,             ONLY : lspinorb, domag
@@ -145,7 +152,7 @@ SUBROUTINE read_xml_file_internal(withbs)
   USE funct,                ONLY : get_inlc, get_dft_name
   USE kernel_table,         ONLY : initialize_kernel_table
   USE esm,                  ONLY : do_comp_esm, esm_init
-  USE mp_bands,             ONLY : intra_bgrp_comm
+  USE mp_bands,             ONLY : intra_bgrp_comm, nyfft
   !
   IMPLICIT NONE
 
@@ -194,13 +201,13 @@ SUBROUTINE read_xml_file_internal(withbs)
   ALLOCATE( extfor(  3, nat ) )
   !
   IF ( tefield ) ALLOCATE( forcefield( 3, nat ) )
-  IF ( monopole ) ALLOCATE( forcemono( 3, nat ) ) ! TB
+  IF ( gate ) ALLOCATE( forcegate( 3, nat ) ) ! TB
   !
   ALLOCATE( irt( 48, nat ) )
   !
   CALL set_dimensions()
-  CALL fft_type_allocate ( dfftp, at, bg, gcutm, intra_bgrp_comm )
-  CALL fft_type_allocate ( dffts, at, bg, gcutms, intra_bgrp_comm)
+  CALL fft_type_allocate ( dfftp, at, bg, gcutm, intra_bgrp_comm, nyfft=nyfft )
+  CALL fft_type_allocate ( dffts, at, bg, gcutms, intra_bgrp_comm, nyfft=nyfft )
   !
   ! ... check whether LSDA
   !
@@ -319,6 +326,9 @@ SUBROUTINE read_xml_file_internal(withbs)
   ! ... re-calculate the local part of the pseudopotential vltot
   ! ... and the core correction charge (if any) - This is done here
   ! ... for compatibility with the previous version of read_file
+  !
+  ! 2D calculations: re-initialize cutoff fact before calculating potentials
+  IF(do_cutoff_2D) CALL cutoff_fact()
   !
   CALL init_vloc()
   CALL struc_fact( nat, tau, nsp, ityp, ngm, g, bg, dfftp%nr1, dfftp%nr2, &

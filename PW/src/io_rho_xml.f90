@@ -14,9 +14,9 @@ MODULE io_rho_xml
   USE xml_io_base, ONLY : create_directory, write_rho, read_rho
 #if !defined (__OLDXML)
   USE io_base,     ONLY : write_rhog, read_rhog
-#endif!
-  PRIVATE
+#endif
   !
+  PRIVATE
   PUBLIC :: write_scf, read_scf
   !
   ! {read|write}_rho: read or write the charge density
@@ -38,6 +38,9 @@ MODULE io_rho_xml
       USE control_flags,    ONLY : gamma_only
       USE io_files,         ONLY : seqopn, tmp_dir, prefix
       USE io_global,        ONLY : ionode, ionode_id, stdout
+      USE mp_pools,         ONLY : my_pool_id
+      USE mp_bands,         ONLY : my_bgrp_id, root_bgrp_id, &
+                                   root_bgrp, intra_bgrp_comm
       USE mp_images,        ONLY : intra_image_comm
       USE mp,               ONLY : mp_bcast
 
@@ -63,7 +66,9 @@ MODULE io_rho_xml
 #if defined (__OLDXML)
       CALL write_rho ( dirname, rho%of_r, nspin_ )
 #else
-      CALL write_rhog( dirname, bg(:,1)*tpiba,bg(:,2)*tpiba,bg(:,3)*tpiba, &
+      IF ( my_pool_id == 0 .AND. my_bgrp_id == root_bgrp_id ) &
+           CALL write_rhog( dirname, root_bgrp, intra_bgrp_comm, &
+           bg(:,1)*tpiba, bg(:,2)*tpiba, bg(:,3)*tpiba, &
            gamma_only, mill, ig_l2g, rho%of_g(:,1:nspin_) )
 #endif
 
@@ -111,7 +116,7 @@ MODULE io_rho_xml
       RETURN
     END SUBROUTINE write_scf
 
-    SUBROUTINE read_scf ( rho, nspin )
+    SUBROUTINE read_scf ( rho, nspin, gamma_only )
       !
       USE scf,              ONLY : scf_type
       USE paw_variables,    ONLY : okpaw
@@ -122,12 +127,15 @@ MODULE io_rho_xml
       USE funct,            ONLY : dft_is_meta
       USE io_files,         ONLY : seqopn, prefix, tmp_dir
       USE io_global,        ONLY : ionode, ionode_id, stdout
+      USE mp_bands,         ONLY : root_bgrp, intra_bgrp_comm
       USE mp_images,        ONLY : intra_image_comm
       USE mp,               ONLY : mp_bcast, mp_sum
       !
       IMPLICIT NONE
       TYPE(scf_type),   INTENT(INOUT)        :: rho
       INTEGER,          INTENT(IN)           :: nspin
+      LOGICAL, OPTIONAL,INTENT(IN)           :: gamma_only
+      !
       CHARACTER(LEN=256) :: dirname
       LOGICAL :: lexist
       INTEGER :: nspin_, iunocc, iunpaw, ierr
@@ -143,7 +151,8 @@ MODULE io_rho_xml
 #if defined (__OLDXML)
       CALL read_rho ( dirname, rho%of_r, nspin_ )
 #else
-      CALL read_rhog( dirname, ig_l2g, nspin_, rho%of_g )
+      CALL read_rhog( dirname, root_bgrp, intra_bgrp_comm, &
+           ig_l2g, nspin_, rho%of_g, gamma_only )
 #endif
       IF ( nspin > nspin_) rho%of_r(:,nspin_+1:nspin) = (0.0_dp, 0.0_dp)
       !

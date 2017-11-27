@@ -97,16 +97,21 @@
                end do
                !
             end do
+
 !$omp end do
             
 !$omp end parallel
             !
             IF( nproc_bgrp > 1 ) THEN
                inl=(iv-1)*na(is)+1
-               CALL dgemm( 'T', 'N', na(is), n, 2*ngw, 1.0d0, wrk2, 2*ngw, c, 2*ngw, 0.0d0, becps( inl, 1 ), nhx )
+               IF( ngw > 0 ) THEN
+                  CALL dgemm( 'T', 'N', na(is), n, 2*ngw, 1.0d0, wrk2, 2*ngw, c, 2*ngw, 0.0d0, becps( inl, 1 ), nhx )
+               END IF
             ELSE
                inl=ish(is)+(iv-1)*na(is)+1
-               CALL dgemm( 'T', 'N', na(is), n, 2*ngw, 1.0d0, wrk2, 2*ngw, c, 2*ngw, 0.0d0, becp( inl, 1 ), nkb )
+               IF( ngw > 0 ) THEN
+                  CALL dgemm( 'T', 'N', na(is), n, 2*ngw, 1.0d0, wrk2, 2*ngw, c, 2*ngw, 0.0d0, becp( inl, 1 ), nkb )
+               END IF
             END IF
 
          end do
@@ -230,8 +235,10 @@
 !$omp end do
 !$omp end parallel 
                inl=ish(is)+(iv-1)*na(is)+1
-               CALL dgemm( 'T', 'N', na(is), nbsp_bgrp, 2*ngw, 1.0d0, wrk2, 2*ngw, &
+               IF( ngw > 0 ) THEN
+                  CALL dgemm( 'T', 'N', na(is), nbsp_bgrp, 2*ngw, 1.0d0, wrk2, 2*ngw, &
                            c_bgrp, 2*ngw, 0.0d0, becdr_bgrp( inl, 1, k ), nkb )
+               END IF
             end do
 
             deallocate( wrk2 )
@@ -541,7 +548,10 @@ SUBROUTINE caldbec_bgrp_x( eigr, c_bgrp, dbec, descla )
                  end do
               end do
               inl=(iv-1)*na(is)+1
-              CALL dgemm( 'T', 'N', na(is), nbsp_bgrp, 2*ngw, 1.0d0, wrk2, 2*ngw, c_bgrp, 2*ngw, 0.0d0, dwrk_bgrp(inl,1), nanh )
+              IF( ngw > 0 ) THEN
+                 CALL dgemm( 'T', 'N', na(is), nbsp_bgrp, 2*ngw, 1.0d0, wrk2, 2*ngw, &
+                             c_bgrp, 2*ngw, 0.0d0, dwrk_bgrp(inl,1), nanh )
+              END IF
            end do
            deallocate( wrk2 )
 
@@ -714,7 +724,7 @@ subroutine nlfq_bgrp_x( c_bgrp, eigr, bec_bgrp, becdr_bgrp, fion )
   !
   real(DP), allocatable :: tmpbec(:,:), tmpdr(:,:) 
   real(DP), allocatable :: fion_loc(:,:)
-#if defined(__OPENMP) 
+#if defined(_OPENMP) 
   INTEGER :: mytid, ntids, omp_get_thread_num, omp_get_num_threads
 #endif  
   !
@@ -734,7 +744,7 @@ subroutine nlfq_bgrp_x( c_bgrp, eigr, bec_bgrp, becdr_bgrp, fion )
 !$omp shared(becdr_bgrp,bec_bgrp,fion_loc,k,f_bgrp,deeq,dvan,nbsp_bgrp,ish,nh,na,nsp,nhm,nbspx_bgrp,ispin_bgrp), &
 !$omp private(tmpbec,tmpdr,isa,is,ia,iv,jv,inl,temp,i,mytid,ntids,sum_tmpdr)
 
-#if defined(__OPENMP)
+#if defined(_OPENMP)
      mytid = omp_get_thread_num()  ! take the thread ID
      ntids = omp_get_num_threads() ! take the number of threads
 #endif
@@ -748,7 +758,7 @@ subroutine nlfq_bgrp_x( c_bgrp, eigr, bec_bgrp, becdr_bgrp, fion )
 
            isa=isa+1
 
-#if defined(__OPENMP)
+#if defined(_OPENMP)
            ! distribute atoms round robin to threads
            !
            IF( MOD( isa, ntids ) /= mytid ) CYCLE

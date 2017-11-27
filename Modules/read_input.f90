@@ -30,7 +30,6 @@ MODULE read_input
      USE read_cards_module,     ONLY : read_cards
      USE io_global,             ONLY : ionode, ionode_id, qestdin
      USE xml_input,             ONLY : xml_input_dump
-     USE read_xml_module,       ONLY : read_xml
      USE mp,                    ONLY : mp_bcast
      USE mp_images,             ONLY : intra_image_comm
      USE iotk_module,           ONLY : iotk_attlenx
@@ -53,13 +52,14 @@ MODULE read_input
      CALL mp_bcast( ierr, ionode_id, intra_image_comm )
      IF ( ierr > 0 ) CALL errore('read_input', 'opening input file',ierr)
      CALL mp_bcast( xmlinput, ionode_id, intra_image_comm )
-     CALL mp_bcast( attr, ionode_id, intra_image_comm )
      !
      CALL reset_input_checks () 
      !
      IF ( xmlinput ) THEN
         !
-        CALL read_xml ( prog, attr )
+        CALL errore('read_input', 'xml input disabled',1)
+        !!! CALL mp_bcast( attr, ionode_id, intra_image_comm )
+        !!! CALL read_xml ( prog, attr )
         !
      ELSE
         !

@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\def\version{6.1}
+\def\version{6.2}
 \def\PWscf{\texttt{PWscf}}
 \def\qe{{\sc Quantum ESPRESSO}}
 
@@ -34,6 +34,7 @@
   \includegraphics[width=5cm]{\qeImage} \\
   % title
   \Huge \PWscf\ User's Guide (v.\version) 
+  \\ \Large (only partially updated)
 }
 
 \maketitle
@@ -48,6 +49,9 @@ a core component of the \qe\ distribution.
 Further documentation, beyond what is provided 
 in this guide, can be found in the directory
 \texttt{PW/Doc/}, containing a copy of this guide.
+
+{\em Important notice: due to the lack of time and of manpower, this
+manual is only partially updated and may contain outdated information.}
 
 This guide assumes that you know the physics 
 that \PWscf\ describes and the methods it implements.
@@ -122,11 +126,14 @@ and many others. We quote in particular:
 \end{itemize}
 and the more recent contributors:
 \begin{itemize}
+  \item Miha Gunde for interface with Grimme's DFT-D3 code, as
+	repackaged by Bàlint Aradi
+  \item Pietro Bonf\`a (CINECA) for memory estimator;
   \item Michele Ceriotti and Riccardo Petraglia (EPFL Lausanne) for
         interfacing with i-PI;
   \item Taylor Barnes (LBL) and Nicola Varini (CSCS) for improvements
         to hybrid functionals;
-  \item Robert DiStasio (Cornell)), Biswajit Santra (Princeton),
+  \item Robert DiStasio (Cornell), Biswajit Santra (Princeton),
         Hsin-Yu Ko (Princeton), Thomas Markovich (Harvard) for
         Tkatchenko-Scheffler stress in PWscf;
   \item Jong-Won Song (RIKEN) for Gau-PBE functional;
@@ -168,29 +175,12 @@ GNU General Public License. See
 \texttt{http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt}, 
 or the file License in the distribution).
     
-We shall greatly appreciate if scientific work done using this code will 
-contain an explicit acknowledgment and the following reference:
-\begin{quote}
-P. Giannozzi, S. Baroni, N. Bonini, M. Calandra, R. Car, C. Cavazzoni,
-D. Ceresoli, G. L. Chiarotti, M. Cococcioni, I. Dabo, A. Dal Corso,
-S. Fabris, G. Fratesi, S. de Gironcoli, R. Gebauer, U. Gerstmann,
-C. Gougoussis, A. Kokalj, M. Lazzeri, L. Martin-Samos, N. Marzari,
-F. Mauri, R. Mazzarello, S. Paolini, A. Pasquarello, L. Paulatto,
-C. Sbraccia, S. Scandolo, G. Sclauzero, A. P. Seitsonen, A. Smogunov,
-P. Umari, R. M. Wentzcovitch, J.Phys.:Condens.Matter 21, 395502 (2009),
-http://arxiv.org/abs/0906.2569
-\end{quote}
-\begin{quote}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input ../../Doc/quote.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 References for all exchange-correlation functionals can be found in the header
 of file \texttt{Modules/funct.f90}.
-\end{quote}
-Note the form \qe\ for textual citations of the code.
-Pseudopotentials should be cited as (for instance)
-\begin{quote}
-[ ] We used the pseudopotentials C.pbe-rrjkus.UPF
-and O.pbe-vbc.UPF from\\
-\texttt{http://www.quantum-espresso.org}.
-\end{quote}
 
 \section{Compilation}
 

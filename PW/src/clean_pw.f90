@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 ! TB
-! included deallocation of forcefield of monopole 'forcemono'
+! included deallocation of forcefield of gate 'forcegate'
 !
 !----------------------------------------------------------------------
 SUBROUTINE clean_pw( lflag )
@@ -44,7 +44,7 @@ SUBROUTINE clean_pw( lflag )
   USE uspp_param,           ONLY : upf
   USE m_gth,                ONLY : deallocate_gth
   USE ldaU,                 ONLY : deallocate_ldaU
-  USE extfield,             ONLY : forcefield, forcemono
+  USE extfield,             ONLY : forcefield, forcegate
   USE fft_base,             ONLY : dfftp, dffts  
   USE fft_base,             ONLY : pstickdealloc
   USE fft_types,            ONLY : fft_type_deallocate
@@ -63,6 +63,7 @@ SUBROUTINE clean_pw( lflag )
   USE pseudo_types,         ONLY : deallocate_pseudo_upf
   USE bp,                   ONLY : deallocate_bp_efield
   USE exx,                  ONLY : deallocate_exx
+  USE Coul_cut_2D,          ONLY : cutoff_2D, lr_Vloc 
   !
   USE control_flags,        ONLY : ts_vdw
   USE tsvdw_module,         ONLY : tsvdw_finalize
@@ -90,20 +91,19 @@ SUBROUTINE clean_pw( lflag )
      !
      IF ( ALLOCATED( force ) )      DEALLOCATE( force )
      IF ( ALLOCATED( forcefield ) ) DEALLOCATE( forcefield )
-     IF ( ALLOCATED( forcemono ) )  DEALLOCATE( forcemono )
+     IF ( ALLOCATED( forcegate ) )  DEALLOCATE( forcegate )
      IF ( ALLOCATED( irt ) )        DEALLOCATE( irt )
      !
      CALL dealloca_london()
      CALL cleanup_xdm()
      CALL deallocate_constraint()
+     CALL deallocate_tetra ( )
      !
   END IF
   !
   CALL deallocate_bp_efield()
   !
   CALL deallocate_ldaU ( lflag )
-  !
-  CALL deallocate_tetra ( )
   !
   IF ( ALLOCATED( f_inp ) .and. lflag )      DEALLOCATE( f_inp )
   !
@@ -142,7 +142,9 @@ SUBROUTINE clean_pw( lflag )
   !
   ! ... arrays allocated in allocate_locpot.f90 ( and never deallocated )
   !
-  IF ( ALLOCATED( vloc ) )       DEALLOCATE( vloc )
+  IF ( ALLOCATED( vloc ) )       DEALLOCATE( vloc ) 
+  IF ( ALLOCATED( cutoff_2D ) )  DEALLOCATE( cutoff_2D )
+  IF ( ALLOCATED( lr_Vloc ) )    DEALLOCATE( lr_Vloc )
   IF ( ALLOCATED( strf ) )       DEALLOCATE( strf )
   IF ( ALLOCATED( eigts1 ) )     DEALLOCATE( eigts1 )
   IF ( ALLOCATED( eigts2 ) )     DEALLOCATE( eigts2 )

@@ -130,7 +130,7 @@ SUBROUTINE run_pwscf ( exit_status )
      !
      ! ... ionic section starts here
      !
-     CALL start_clock( 'ions' )
+     CALL start_clock( 'ions' ); !write(*,*)' start ions' ; FLUSH(6)
      conv_ions = .TRUE.
      !
      ! ... recover from a previous run, if appropriate
@@ -177,12 +177,13 @@ SUBROUTINE run_pwscf ( exit_status )
         !
      END IF
      !
-     CALL stop_clock( 'ions' )
+     CALL stop_clock( 'ions' ); !write(*,*)' stop ions' ; FLUSH(6)
      !
      CALL qmmm_update_forces( force, rho%of_r, nspin, dfftp)
      !
      ! ... exit condition (ionic convergence) is checked here
      !
+     IF ( lmd .OR. lbfgs ) CALL add_qexsd_step(idone)
      IF ( conv_ions ) EXIT main_loop
      !
      ! ... receive new positions from MM code in QM/MM run
@@ -198,7 +199,6 @@ SUBROUTINE run_pwscf ( exit_status )
         ! ... update_pot initializes structure factor array as well
         !
         CALL update_pot()
-        CALL add_qexsd_step(idone)
         !
         ! ... re-initialize atomic position-dependent quantities
         !

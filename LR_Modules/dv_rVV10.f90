@@ -96,7 +96,7 @@ subroutine get_delta_v(rho, drho, nspin, q_point, delta_v)
 
     complex(DP), intent(OUT) :: delta_v(dfftp%nnr)
 
-    !! Varables needed for calcualtions
+    !! Variables needed for calculations
 
     real(dp)    :: gmod, gmod2
     real(dp)    :: theta, dtheta_dn, dtheta_dgradn, d2theta_dn2, dn_dtheta_dgradn, dgradn_dtheta_dgradn 
@@ -199,7 +199,7 @@ subroutine get_delta_v(rho, drho, nspin, q_point, delta_v)
 
     !! --------------------------------------------------------------------------------------------- 
     !! Begin integral for the delta_b part
-    !!---------------------------------------------------------------------------------------------    	
+    !!--------------------------------------------------------------------------------------------- 
  
     do i_grid = 1,dfftp%nnr
 
@@ -260,7 +260,7 @@ subroutine get_delta_v(rho, drho, nspin, q_point, delta_v)
 
     !! --------------------------------------------------------------------------------------------- 
     !! Begin h
-    !!---------------------------------------------------------------------------------------------    	
+    !!--------------------------------------------------------------------------------------------- 
    
     delta_h(:) = 0.0_DP
     delta_h1(:) = 0.0_DP

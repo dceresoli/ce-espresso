@@ -11,12 +11,12 @@ subroutine dqvan2 (ngy, ih, jh, np, qmod, dqg, ylmk0, dylmk0, ipol)
   !
   !    This routine computes the derivatives of the fourier transform of
   !    the Q function needed in stress assuming that the radial fourier
-  !    trasform is already computed and stored in table qrad.
+  !    transform is already computed and stored in table qrad.
   !
   !    The formula implemented here is
   !
-  !     dq(g,l,k) = sum_lm (-i)^l ap(lm,l,k) *
-  !                ( yr_lm(g^) dqrad(g,l,l,k) + dyr_lm(g^) qrad(g,l,l,k))
+  !     dq(g,i,j) = sum_lm (-i)^l ap(lm,i,j) *
+  !                ( yr_lm(g^) dqrad(g,l,i,j) + dyr_lm(g^) qrad(g,l,i,j))
   !
   !     here the dummy variables
   !
@@ -124,7 +124,7 @@ subroutine dqvan2 (ngy, ih, jh, np, qmod, dqg, ylmk0, dylmk0, ipol)
         !
         ! calculate quantites depending on the module of G only when needed
         !
-#if !defined(__OPENMP)
+#if !defined(_OPENMP)
         IF ( ABS( qmod(ig) - qm1 ) > 1.0D-6 ) THEN
 #endif
            qm = qmod (ig) * dqi
@@ -151,7 +151,7 @@ subroutine dqvan2 (ngy, ih, jh, np, qmod, dqg, ylmk0, dylmk0, ipol)
 
            work1 = work1 * dqi
 
-#if !defined(__OPENMP)
+#if !defined(_OPENMP)
            qm1 = qmod(ig)
         END IF
 #endif

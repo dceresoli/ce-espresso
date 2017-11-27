@@ -38,7 +38,6 @@ subroutine mgga_libxc(func_id, has_exc, rho, grho, tau, s, v1, v2, v3)
 
   TYPE(xc_f90_pointer_t) :: xc_func
   TYPE(xc_f90_pointer_t) :: xc_info
-  integer, SAVE :: major=0, minor=0, micro=0
   integer :: size = 1
   real(dp) :: lapl_rho, vlapl_rho ! not used?
   lapl_rho = grho

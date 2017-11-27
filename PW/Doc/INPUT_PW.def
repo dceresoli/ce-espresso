@@ -16,6 +16,9 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
         fortran code. Comments lines in @i cards can be introduced by 
         either a "!" or a "#" character in the first position of a line.
         Do not start any line in @i cards with a "/" character.
+        Leave a space between card names and card options, e.g.
+        ATOMIC_POSITIONS (bohr), not ATOMIC_POSITIONS(bohr)
+        Do not start any line in @i cards with a "/" character.
 
         
         @b {Structure of the input data:}
@@ -152,17 +155,19 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
         }
         
         var wf_collect -type LOGICAL { 
-            default { .FALSE. }
+            default { .TRUE. }
             info {
                 This flag controls the way wavefunctions are stored to disk :
 
                 .TRUE.  collect wavefunctions from all processors, store them
-                        into the output data directory "outdir"/"prefix".save,
-                        ...
+                        into the output data directory "outdir"/"prefix".save
+                        The resulting format is portable to a different number
+                        of processor, or different kind of parallelization
 
-                        .FALSE. do not collect wavefunctions, leave them in temporary
-                                local files (one per processor). The resulting format
-                                ...
+                .FALSE. do not collect wavefunctions, leave them in temporary
+                        local files (one per processor). The resulting format
+                        is readable only on the same number of processors and
+                        with the same knd of paralleliztio used to write it.
 
                 Note that this flag has no effect on reading, only on writing.
             }
@@ -434,21 +439,22 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
             }
         }
 
-        var monopole -type LOGICAL {
+        var gate -type LOGICAL {
             default { .FALSE. }
-            see { zmon, realxz, block, block_1, block_2, block_height }
+            see { zgate, relaxz, block, block_1, block_2, block_height }
             info {
-                In the case of charged cells (@ref tot_charge .ne. 0) setting monopole = .TRUE.
+                In the case of charged cells (@ref tot_charge .ne. 0) setting gate = .TRUE.
                 represents the counter charge (i.e. -tot_charge) not by a homogenous
-                background charge but with a charged plate, which is placed at @ref zmon
-                (see below). Details of the monopole potential can be found in
+                background charge but with a charged plate, which is placed at @ref zgate
+                (see below). Details of the gate potential can be found in
                 T. Brumme, M. Calandra, F. Mauri; PRB 89, 245406 (2014).
                 Note, that in systems which are not symmetric with respect to the plate,
                 one needs to enable the dipole correction! (@ref dipfield=.true.).
-                Currently, symmetry can be used with monopole=.true. but carefully check
+                Currently, symmetry can be used with gate=.true. but carefully check
                 that no symmetry is included which maps @i z to -@i z even if in principle one
                 could still use them for symmetric systems (i.e. no dipole correction).
                 For @ref nosym=.false. verbosity is set to 'high'.
+                Note: this option was called "monopole" in v6.0 and 6.1 of pw.x
             }
         }
 
@@ -655,6 +661,14 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
             }
         }
         
+        dimension starting_charge -start 1 -end ntyp -type REAL {
+            default { 0.0 }
+            info {
+                starting charge on atomic type 'i',
+                to create starting potential with @ref startingpot = 'atomic'.
+            }
+        }
+
         var tot_magnetization -type REAL { 
             default { -1 [unspecified] }
             info {
@@ -761,7 +775,7 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
         var nosym -type LOGICAL { 
             default { .FALSE. }
             info {
-                if (.TRUE.) symmetry is not used, which means that:
+                if (.TRUE.) symmetry is not used. Consequences:
                 
                 - if a list of k points is provided in input, it is used
                   "as is": symmetry-inequivalent k-points are not generated,
@@ -773,7 +787,8 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
                   Time reversal symmetry is assumed so k and -k are considered
                   as equivalent unless @ref noinv=.true. is specified.
 
-                A careful usage of this option can be advantageous:
+                Do not use this option unless you know exactly what you want
+                and what you get. May be useful in the following cases:
                 - in low-symmetry large cells, if you cannot afford a k-point
                   grid with the correct symmetry
                 - in MD simulations
@@ -1425,8 +1440,42 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
                          disabled along z, either by setting @ref nosym = .TRUE.
                          or by very slight displacement (i.e., 5e-4 a.u.)
                          of the slab along z.
+
+                       - Components of the total stress; sigma_xy, sigma_yz,
+                         sigma_zz, sigma_zy, and sigma_zx are meaningless 
+                         bacause ESM stress routines calculate only
+                         components of stress; sigma_xx, sigma_xy, sigma_yx,
+                         and sigma_yy.
+
+                       - In case of calculation='vc-relax', use
+                         cell_dofree='2Dxy' or other parameters so that
+                         c-vector along z-axis should not be moved.
                        
                     See @ref esm_bc, @ref esm_efield, @ref esm_w, @ref esm_nfit.
+                }
+                opt -val '2D' {
+                    Truncation of the Coulomb interaction in the z direction 
+                    for structures periodic in the x-y plane. Total energy, 
+                    forces and stresses are computed in a two-dimensional framework. 
+                    Linear-response calculations () done on top of a self-consistent 
+                    calculation with this flag will automatically be performed in 
+                    the 2D framework as well. Please refer to:
+                    Sohier, T., Calandra, M., & Mauri, F. (2017), Density functional 
+                    perturbation theory for gated two-dimensional heterostructures:
+                    Theoretical developments and application to flexural phonons in graphene.
+                    Physical Review B, 96(7), 75448. https://doi.org/10.1103/PhysRevB.96.075448
+            NB:
+                       - The length of the unit-cell along the z direction should
+                         be larger than twice the thickness of the 2D material 
+                         (including electrons). A reasonable estimate for a 
+                         layer's thickness could be the interlayer distance in the 
+                         corresponding layered bulk material. Otherwise,  
+                         the atomic thickness + 10 bohr should be a safe estimate. 
+                         There is also a lower limit of 20 bohr imposed by the cutoff 
+                         radius used to read pseudopotentials (see read_pseudo.f90 in Modules).
+
+                       - As for ESM above, only in-plane stresses make sense and one
+                         should use cell_dofree='2Dxy' in a vc-relax calculation.
                 }
             }
         }
@@ -1658,24 +1707,24 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
          }
     
         group {
-	    label { below variables are used only if @ref monopole = .TRUE. }
+	    label { below variables are used only if @ref gate = .TRUE. }
 
-	    var zmon -type REAL {
+	    var zgate -type REAL {
 		default { 0.5 }
 		info {
-		    used only if @ref monopole = .TRUE.
+		    used only if @ref gate = .TRUE.
 		    Specifies the position of the charged plate which represents
 		    the counter charge in doped systems (@ref tot_charge .ne. 0).
-		    In units of the unit cell length in @i z direction, @ref zmon in ]0,1[
-                    Details of the monopole potential can be found in
+		    In units of the unit cell length in @i z direction, @ref zgate in ]0,1[
+                    Details of the gate potential can be found in
                     T. Brumme, M. Calandra, F. Mauri; PRB 89, 245406 (2014).
 		}
 	    }
 
-	    var realxz -type LOGICAL {
+	    var relaxz -type LOGICAL {
 		default { .FALSE. }
 		info {
-		    used only if @ref monopole = .TRUE.
+		    used only if @ref gate = .TRUE.
 		    Allows the relaxation of the system towards the charged plate.
 		    Use carefully and utilize either a layer of fixed atoms or a
 		    potential barrier (@ref block=.TRUE.) to avoid the atoms moving to
@@ -1687,7 +1736,7 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
 	    var block -type LOGICAL {
 		default { .FALSE. }
 		info {
-		    used only if @ref monopole = .TRUE.
+		    used only if @ref gate = .TRUE.
 		    Adds a potential barrier to the total potential seen by the
 		    electrons to mimic a dielectric in field effect configuration
 		    and/or to avoid electrons spilling into the vacuum region for
@@ -1701,7 +1750,7 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
 	    var block_1 -type REAL {
 		default { 0.45 }
 		info {
-		    used only if @ref monopole = .TRUE. and @ref block = .TRUE.
+		    used only if @ref gate = .TRUE. and @ref block = .TRUE.
 		    lower beginning of the potential barrier, in units of the
 		    unit cell size along @i z, @ref block_1 in ]0,1[
 		}
@@ -1710,7 +1759,7 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
 	    var block_2 -type REAL {
 		default { 0.55 }
 		info {
-		    used only if @ref monopole = .TRUE. and @ref block = .TRUE.
+		    used only if @ref gate = .TRUE. and @ref block = .TRUE.
 		    upper beginning of the potential barrier, in units of the
 		    unit cell size along @i z, @ref block_2 in ]0,1[
                 }
@@ -1719,7 +1768,7 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
 	    var block_height -type REAL {
 		default { 0.1 }
 		info {
-		    used only if @ref monopole = .TRUE. and @ref block = .TRUE.
+		    used only if @ref gate = .TRUE. and @ref block = .TRUE.
 		    Height of the potential barrier in Rydberg.
 		}
 	    }
@@ -1840,8 +1889,8 @@ input_description -distribution {Quantum Espresso} -package PWscf -program pw.x 
 
                 opt -val 'cg' {
                     Conjugate-gradient-like band-by-band diagonalization.
-                    Typically slower than 'david' but it uses less memory
-                    and is more robust (it seldom fails).
+                    Slower than 'david' but uses less memory and is 
+                    (a little bit) more robust.
                 }
 
                 opt -val {'cg-serial', 'david-serial'} {

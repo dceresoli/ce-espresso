@@ -9,10 +9,10 @@
 
 MODULE orthogonalize_base
 
-
       USE kinds
       USE dspev_module, ONLY: diagonalize_serial, diagonalize_parallel
-
+      USE mytime, ONLY : f_wall
+      
       IMPLICIT NONE
 
       SAVE
@@ -56,8 +56,6 @@ CONTAINS
       REAL(DP) :: t1, tpar, tser
       INTEGER  :: nr, nc, ir, ic, nx
       TYPE(la_descriptor) :: desc
-      REAL(DP) :: cclock
-      EXTERNAL :: cclock
       INTEGER, PARAMETER :: paradim = 1000
       !
       ! Check if number of PEs for orthogonalization/diagonalization is given from the input
@@ -92,11 +90,11 @@ CONTAINS
       CALL set_a()
       !
       CALL mp_barrier( intra_bgrp_comm )
-      t1 = cclock()
+      t1 = f_wall()
       !
       CALL diagonalize_parallel( n, a, d, s, desc )
       !
-      tpar = cclock() - t1
+      tpar = f_wall() - t1
       CALL mp_max( tpar, intra_bgrp_comm )
 
       DEALLOCATE( s, a )
@@ -113,11 +111,11 @@ CONTAINS
 
          CALL set_a()
 
-         t1 = cclock()
+         t1 = f_wall()
 
          CALL diagonalize_serial( n, a, d )
 
-         tser = cclock() - t1
+         tser = f_wall() - t1
 
          DEALLOCATE( a )
 
@@ -184,6 +182,7 @@ CONTAINS
 
    SUBROUTINE mesure_mmul_perf( n )
       !
+      USE mp_world,    ONLY: world_comm
       USE mp_bands,    ONLY: nproc_bgrp, me_bgrp, intra_bgrp_comm, &
                              root_bgrp, my_bgrp_id, nbgrp
       USE mp_images,   ONLY: nimage, my_image_id
@@ -203,9 +202,6 @@ CONTAINS
       INTEGER  :: nr, nc, ir, ic, np, lnode
       TYPE(la_descriptor) :: desc
       !
-      REAL(DP) :: cclock
-      EXTERNAL :: cclock
-      !
       np    = MAX( INT( SQRT( DBLE( nproc_ortho ) + 0.1d0 ) ), 1 ) 
       !
       !  Make ortho group compatible with the number of electronic states
@@ -214,7 +210,7 @@ CONTAINS
       !
       !  Now re-define the ortho group and test the performance
       !
-      CALL init_ortho_group( np * np, intra_bgrp_comm, nimage*nbgrp, my_bgrp_id + nbgrp * my_image_id )
+      CALL init_ortho_group( np * np, world_comm, intra_bgrp_comm, nimage*nbgrp, my_bgrp_id + nbgrp * my_image_id )
 
       CALL descla_init( desc, n, n, np_ortho, me_ortho, ortho_comm, ortho_cntx, ortho_comm_id )
 
@@ -231,11 +227,11 @@ CONTAINS
       CALL sqr_mm_cannon( 'N', 'N', n, 1.0d0, a, nr, b, nr, 0.0d0, c, nr, desc) 
 
       CALL mp_barrier( intra_bgrp_comm )
-      t1 = cclock()
+      t1 = f_wall()
 
       CALL sqr_mm_cannon( 'N', 'N', n, 1.0d0, a, nr, b, nr, 0.0d0, c, nr, desc)
    
-      tcan = cclock() - t1
+      tcan = f_wall() - t1
       CALL mp_max( tcan, intra_bgrp_comm )
 
       DEALLOCATE( a, c, b )
@@ -666,8 +662,12 @@ CONTAINS
 
                root = root * leg_ortho
 
-               CALL dgemm( 'T', 'N',  nr, nc, 2*ngw, -2.0d0, cp( 1, ist + ir - 1), 2*ngwx, &
+               IF( ngw > 0 ) THEN 
+                  CALL dgemm( 'T', 'N',  nr, nc, 2*ngw, -2.0d0, cp( 1, ist + ir - 1), 2*ngwx, &
                            cp( 1, ist + ic - 1 ), 2*ngwx, 0.0d0, sigp, nx )
+               ELSE
+                  sigp = 0.0d0
+               END IF
                !
                !     q = 0  components has weight 1.0
                !
@@ -804,18 +804,22 @@ CONTAINS
             !
             IF( MOD( root , nbgrp ) == my_bgrp_id ) THEN
 
-            root = root * leg_ortho
+               root = root * leg_ortho
 
-            CALL dgemm( 'T', 'N', nr, nc, 2*ngw, 2.0d0, phi( 1, ist + ir - 1 ), 2*ngwx, &
-                  cp( 1, ist + ic - 1 ), 2*ngwx, 0.0d0, rhop, nx )
-            !
-            !     q = 0  components has weight 1.0
-            !
-            IF (gstart == 2) THEN
-               CALL DGER( nr, nc, -1.D0, phi(1,ist+ir-1), 2*ngwx, cp(1,ist+ic-1), 2*ngwx, rhop, nx )
-            END IF
+               IF( ngw > 0 ) THEN
+                  CALL dgemm( 'T', 'N', nr, nc, 2*ngw, 2.0d0, phi( 1, ist + ir - 1 ), 2*ngwx, &
+                              cp( 1, ist + ic - 1 ), 2*ngwx, 0.0d0, rhop, nx )
+               ELSE
+                  rhop = 0.0d0
+               END IF
+               !
+               !     q = 0  components has weight 1.0
+               !
+               IF (gstart == 2) THEN
+                  CALL DGER( nr, nc, -1.D0, phi(1,ist+ir-1), 2*ngwx, cp(1,ist+ic-1), 2*ngwx, rhop, nx )
+               END IF
 
-            CALL mp_root_sum( rhop, rho, root, intra_bgrp_comm )
+               CALL mp_root_sum( rhop, rho, root, intra_bgrp_comm )
 
             END IF
 
@@ -947,8 +951,12 @@ CONTAINS
             !  All processors contribute to the tau block of processor (ipr,ipc)
             !  with their own part of wavefunctions
             !
-            CALL dgemm( 'T', 'N', nr, nc, 2*ngw, 2.0d0, phi( 1, ist + ir - 1 ), 2*ngwx, &
+            IF( ngw > 0 ) THEN
+               CALL dgemm( 'T', 'N', nr, nc, 2*ngw, 2.0d0, phi( 1, ist + ir - 1 ), 2*ngwx, &
                         phi( 1, ist + ic - 1 ), 2*ngwx, 0.0d0, taup, nx )
+            ELSE
+               taup = 0.0d0
+            END IF
             !
             !           q = 0  components has weight 1.0
             !
@@ -1045,6 +1053,8 @@ CONTAINS
       INTEGER :: np( 2 ), coor_ip( 2 )
       TYPE(la_descriptor) :: desc_ip
 
+      CALL start_clock( 'updatc' )
+
       DO iss = 1, nspin
          !
          !  size of the local block
@@ -1071,7 +1081,6 @@ CONTAINS
          np(1) = desc( iss )%npr
          np(2) = desc( iss )%npc
          !
-         CALL start_clock( 'updatc' )
    
          ALLOCATE( xd( nrcx, nrcx ) )
    
@@ -1151,8 +1160,10 @@ CONTAINS
    
                CALL mp_bcast( xd, root, intra_bgrp_comm )
    
-               CALL dgemm( 'N', 'N', 2*ngw, nbgrp_i, nr, 1.0d0, phi(1,istart+ir-1), 2*ngwx, &
+               IF( ngw > 0 ) THEN
+                  CALL dgemm( 'N', 'N', 2*ngw, nbgrp_i, nr, 1.0d0, phi(1,istart+ir-1), 2*ngwx, &
                            xd(1,i_first), nrcx, 1.0d0, cp_bgrp(1,ibgrp_i_first), 2*ngwx )
+               END IF
    
                IF( nvb > 0 )THEN
    
@@ -1228,7 +1239,7 @@ CONTAINS
       USE io_global,      ONLY: stdout
       USE mp_global,      ONLY: intra_bgrp_comm, inter_bgrp_comm
       USE uspp_param,     ONLY: nh, ish, nvb
-      USE uspp,           ONLY: nkbus, qq
+      USE uspp,           ONLY: nkbus, qq_nt
       USE gvecw,          ONLY: ngw
       USE electrons_base, ONLY: nbsp_bgrp, nbsp
       USE constants,      ONLY: pi, fpi
@@ -1264,8 +1275,8 @@ CONTAINS
                inl = ish(is)+(iv-1)*na(is)
                DO jv=1,nh(is)
                   jnl = ish(is)+(jv-1)*na(is)
-                  IF(ABS(qq(iv,jv,is)) > 1.d-5) THEN
-                     qqf = qq(iv,jv,is)
+                  IF(ABS(qq_nt(iv,jv,is)) > 1.d-5) THEN
+                     qqf = qq_nt(iv,jv,is)
                      DO i=1,nbsp_bgrp
                         CALL daxpy( na(is), qqf, bec_bgrp(jnl+1,i),1,qtemp(inl+1,i), 1 )
                      END DO
@@ -1274,8 +1285,12 @@ CONTAINS
             END DO
          END DO
 !
-         CALL dgemm ( 'N', 'N', 2*ngw, nbsp_bgrp, nkbus, 1.0d0, betae, &
+         IF( ngw > 0 ) THEN
+            CALL dgemm ( 'N', 'N', 2*ngw, nbsp_bgrp, nkbus, 1.0d0, betae, &
                        2*ngwx, qtemp, nkbus, 0.0d0, phi_bgrp, 2*ngwx )
+         ELSE
+            phi_bgrp = 0.0d0
+         END IF
 
          DEALLOCATE( qtemp )
 

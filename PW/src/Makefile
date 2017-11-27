@@ -3,7 +3,10 @@
 include ../../make.inc
 
 # location of needed modules and included files (if any)
-MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules $(MOD_FLAG)../../FFTXlib $(MOD_FLAG)../../LAXlib
+MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
+          $(MOD_FLAG)../../FFTXlib $(MOD_FLAG)../../LAXlib $(MOD_FLAG)../../UtilXlib \
+          $(MOD_FLAG)../../KS_Solvers/Davidson $(MOD_FLAG)../../KS_Solvers/CG \
+          $(MOD_FLAG)../../dft-d3/
 
 PWOBJS = \
 pwscf.o 
@@ -13,7 +16,7 @@ a2fmod.o \
 add_bfield.o \
 add_efield.o \
 add_vuspsi.o \
-add_monofield.o \
+add_gatefield.o \
 add_paw_to_deeq.o \
 add_vhub_to_deeq.o \
 addusdens.o \
@@ -38,10 +41,7 @@ buffers.o \
 c_bands.o \
 c_phase_field.o \
 orbm_kubo.o \
-ccgdiagg.o \
 cdiagh.o \
-cdiaghg.o \
-cegterg.o \
 clean_pw.o \
 close_files.o \
 compute_becsum.o \
@@ -52,9 +52,9 @@ compute_qdipol.o \
 compute_qdipol_so.o \
 compute_ux.o \
 coset.o \
+Coul_cut_2D.o \
 d_matrix.o \
 data_structure.o \
-data_structure_custom.o \
 deriv_drhoc.o \
 divide_class.o \
 divide_class_so.o \
@@ -62,6 +62,7 @@ divide.o \
 divide_et_impera.o \
 dqvan2.o \
 drhoc.o \
+rotate_wfc.o \
 run_driver.o \
 dvloc_of_g.o \
 dynamics_module.o \
@@ -70,7 +71,6 @@ efermit.o \
 electrons.o \
 eqvect.o \
 esm.o \
-esm_cft.o \
 ewald.o \
 ewald_dipole.o \
 extfield.o \
@@ -172,21 +172,15 @@ pw2blip.o \
 pw2casino.o \
 pw2casino_write.o \
 qvan2.o \
-rcgdiagg.o \
 rdiagh.o \
-rdiaghg.o \
 read_conf_from_file.o \
 read_file.o \
 read_file_new.o \
 realus.o \
-regterg.o \
 remove_atomic_rho.o \
 report_mag.o \
 restart_in_electrons.o \
 rho2zeta.o \
-rotate_wfc.o \
-rotate_wfc_k.o \
-rotate_wfc_gamma.o \
 ruotaijk.o \
 run_pwscf.o \
 s_1psi.o \
@@ -194,6 +188,7 @@ s_psi.o \
 save_in_cbands.o \
 save_in_electrons.o \
 scale_h.o \
+loc_scdm.o \
 scf_mod.o \
 set_kplusq.o \
 set_kup_and_kdw.o \
@@ -213,6 +208,7 @@ stres_knl.o \
 stres_loc.o \
 stres_us.o \
 stres_nonloc_dft.o \
+stres_mgga.o \
 stress.o \
 struct_fact.o \
 sum_band.o \
@@ -237,6 +233,7 @@ vcsubs.o \
 vhpsi.o \
 vloc_of_g.o \
 vloc_psi.o \
+utils.o \
 xdm_dispersion.o \
 wfcinit.o \
 write_ns.o \
@@ -251,9 +248,10 @@ wannier_occ.o \
 wannier_enrg.o \
 z2_c_phase.o
 
-QEMODS=../../Modules/libqemod.a ../../FFTXlib/libqefft.a ../../LAXlib/libqela.a
+QEMODS=../../Modules/libqemod.a ../../KS_Solvers/Davidson/libdavid.a ../../KS_Solvers/CG/libcg.a \
+       ../../FFTXlib/libqefft.a ../../LAXlib/libqela.a ../../UtilXlib/libutil.a ../../dft-d3/libdftd3qe.a
 
-TLDEPS=bindir mods libs liblapack libblas
+TLDEPS=bindir mods libs liblapack libblas dftd3
 
 all : tldeps pw.x generate_vdW_kernel_table.x generate_rVV10_kernel_table.x
 
