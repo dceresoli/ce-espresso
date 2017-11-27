@@ -22,14 +22,38 @@
 
   
 #if defined(__LIBXC)
+
+module libxc_version
+  implicit none
+  save
+
+  integer :: libxc_major=0, libxc_minor=0, libxc_micro=0
+  public :: libxc_major, libxc_minor, libxc_micro, get_libxc_version
+
+  contains
+
+  subroutine get_libxc_version
+     implicit none
+     interface
+        subroutine xc_version(major, minor, micro) bind(c)
+           use iso_c_binding
+           integer(c_int) :: major, minor, micro
+        end subroutine xc_version
+     end interface
+     call xc_version(libxc_major, libxc_minor, libxc_micro)
+  end subroutine get_libxc_version
+
+end module libxc_version
+
+
 !======================================================================
 ! Generic meta-GGA functional via LibXC
 !======================================================================
 subroutine mgga_libxc(func_id, has_exc, rho, grho, tau, s, v1, v2, v3)
   USE kinds,            ONLY : DP
-  USE funct,            ONLY : libxc_major, libxc_minor, libxc_micro, get_libxc_version
   use xc_f90_types_m
   use xc_f90_lib_m
+  use libxc_version
   implicit none  
   integer, intent(in) :: func_id
   logical, intent(in) :: has_exc

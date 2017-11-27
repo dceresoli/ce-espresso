@@ -74,6 +74,9 @@ X_AC_QE_LAPACK()
 # Checking for FFT...
 X_AC_QE_FFT()
 
+# Setting libxc...
+ACX_LIBXC()
+
 # Checking for IBM MASS library...
 X_AC_QE_MASS()
 
@@ -91,9 +94,6 @@ X_AC_QE_XML()
 
 # Setting HDF5...
 X_AC_QE_HDF5()
-
-# Setting libxc...
-ACX_LIBXC()
 
 # Checking SIGNAL...
 X_AC_QE_SIGNAL()

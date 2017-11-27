@@ -344,11 +344,6 @@ module funct
 
   data nonlocc/'NONE', 'VDW1', 'VDW2', 'VV10', 'VDWX', 'VDWY', 'VDWZ' / 
 
-#ifdef __LIBXC
-  integer :: libxc_major=0, libxc_minor=0, libxc_micro=0
-  public :: libxc_major, libxc_minor, libxc_micro, get_libxc_version
-#endif
-
 CONTAINS
   !-----------------------------------------------------------------------
   subroutine set_dft_from_name( dft_ )
@@ -3405,20 +3400,6 @@ subroutine evxc_t_vec(rho,rhoc,lsd,length,vxc,exc)
   end if
 
 end subroutine evxc_t_vec
-
-
-#ifdef __LIBXC
-  subroutine get_libxc_version
-     implicit none
-     interface
-        subroutine xc_version(major, minor, micro) bind(c)
-           use iso_c_binding
-           integer(c_int) :: major, minor, micro
-        end subroutine xc_version
-     end interface
-     call xc_version(libxc_major, libxc_minor, libxc_micro)
-  end subroutine get_libxc_version
-#endif
 
 
 end module funct
